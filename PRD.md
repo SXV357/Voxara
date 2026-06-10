@@ -1,7 +1,10 @@
 # PRD: Voxara - A unified platform to empower the next generation of voice actors/actresses and theatre performers
-**Version:** 0.1 (Draft)  
+**Version:** 0.1 (Draft)
+
 **Author:** Shreyas Viswanathan 
+
 **Last Updated:** Jun 9, 2026 
+
 **Status:** In Progress
 
 ---
