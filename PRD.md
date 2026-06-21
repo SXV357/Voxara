@@ -3,7 +3,7 @@
 
 **Author:** Shreyas Viswanathan 
 
-**Last Updated:** Jun 9, 2026 
+**Last Updated:** Jun 20, 2026 
 
 **Status:** In Progress
 
@@ -11,28 +11,28 @@
 
 ## 1. Problem Statement
 
-### Voice Acting
-> Who is the user, what specific problem do they have, and why do existing tools fail them?
+There are several platforms that exist out there geared towards helping people work on their public speaking and pronunciation skills - some examples are Orai, Yoodli, ELSA Speak, and Speeko. 
+- Orai is more geared towards professionals practicing presentations, pitches and speeches. It records ones audio and video and gives post-session feedback on pace, energy and facial expressions. The facial analysis component exists but underdeveloped.
+- Yoodli is a much more sophisticated multimodal coaching platform covering verbal and visual elements of delivery. It's more enterprise focused than consumer, but is real-time capable and supports deep, structured feedback.
+- ELSA Speak is more like Duolingo but for English pronunciation and has a lot of gamified components like conversation simulations with AI, tracking progress etc. 
+- Speeko functions more as a course platform providing audio analysis.
 
-[Fill in — ground this in the gap you identified: Orai/Yoodli serve business communication, not performance contexts]
+While Yoodli for example allows one to choose from ready-made roleplays or even create roleplays, which would dictate how feedback is presented separate from how is it structured in general cases, the platform as a whole isn't designed for those in the fine arts space - more specifically theatre performers and voice artists.
 
-### Theatre
-> Same structure — who, what problem, why existing tools miss it
+When we talk about public speaking in general or communication in a workspace environment, there are a baseline set of things the above platforms optimize for in terms of how they provide feedback. Performance is alive and art is subjective. More so, he human embodied nature of this work means that this humanity needs to be supported and not replaced.
 
-[Fill in]
-
----
+Those that are involved in this space currently don't have a means of effectively practicing between rehearsals. They may take acting or voice lessons with coaches for example, but there is still a need for them to work on their skills outside of that and more importantly be able to receive specific and actionable feedback.
 
 ## 2. Target Users
 
 ### Voice Acting
-- **Primary:** [e.g. aspiring voice actors, students, hobbyists]
-- **Subtypes captured at onboarding:** Commercial, Audiobook, Character/Animation
-- **Experience level:** [beginner / intermediate — scope this down]
+- **Primary:** Aspiring voice actors, students, hobbyists
+- **Subtypes captured at onboarding:** Commercial, Audiobook, Character/Animation, Narration
 
 ### Theatre
-- **Primary:** [e.g. student performers, community theatre, drama school students]
-- **Experience level:** [fill in]
+- **Primary:** Student and adult performers, community theatre, drama school students
+
+**Experience Level**: This tool will be able to support those who are starting off and those who also have some experience. This will be factored into the onboarding flow which will be used for the personalization aspect.
 
 ---
 
@@ -50,21 +50,22 @@
 
 ---
 
-## 4. App Structure
+## 4. App Structure (Tentative)
 
 ### Entry & Navigation
-- User logs in → Dashboard with two coaching cards: **Voice Acting** and **Theatre**
+- User logs in → Dashboard that will contain the user's recordings that they can click into and view. There will be a navigation pane to the leftmost side with 2 options: **Voice Acting** and **Theatre**
 - First time selecting a mode → triggers onboarding flow for that mode
 - Returning user → goes directly to session selection
+- There should also most likely be a place where the user can click and view their profile. This is a place where they could go and modify details they provided as part of the onboarding flows so the personalization is up-to-date.
 
 ### Onboarding Per Mode (first time only)
-**Voice Acting onboarding captures:**
-- Subtype: Commercial / Audiobook / Character & Animation
+**Voice Acting onboarding captures (at the minimum):**
+- Subtype: Commercial / Audiobook / Character & Animation / Narration
 - Experience level
 - Goals (e.g. reduce filler words, improve character differentiation, mic technique)
 
-**Theatre onboarding captures:**
-- Focus area: [fill in — dramatic, comedic, musical-adjacent?]
+**Theatre onboarding captures (at the minimum):**
+- Focus area: Singing has been deferred as more of a stretch goal so musical-adjacent as a focus area would be hard to capture. They could specify anything else like drama, comedy, villian-adjacent roles, etc
 - Experience level
 - Goals
 
@@ -79,14 +80,14 @@
 2. User reads scenario context + script
 3. User records audio (in-app) 
 4. App processes recording
-5. Feedback screen rendered
+5. Feedback screen rendered potentially alongside the audio transcript with timestamps
 
 ### Theatre Session
 1. User selects a curated scenario
 2. User reads scenario context + script/prompt
 3. User records video (in-app) — webcam + mic
 4. App processes recording (audio + facial)
-5. Feedback screen rendered
+5. Feedback screen rendered potentially alongside the recorded video, including transcript with timestamps
 
 ---
 
@@ -122,13 +123,13 @@
 
 | # | Scenario | Type | Primary Dimensions Targeted |
 |---|---|---|---|
-| 1 | [e.g. 15-second cereal commercial] | Commercial | Pacing, Enunciation, Energy |
-| 2 | [e.g. villain monologue excerpt] | Character | Tonal Differentiation, Expressiveness |
-| 3 | [e.g. audiobook passage with 2 characters] | Audiobook | Breath Support, Character Differentiation |
-| 4 | [fill in] | | |
+| 1 | Villain monologue | Character/Animation | Tonal/Character Differentiation, Pitch Variance & Expressiveness, Intentional Pausing |
+| 2 | Fast Food Commercial | Commercial | Pacing, Energy/Pitch, Enunciation, Filler Words & Flow |
+| 3 | Multi-character audiobook dialogue | Audiobook | Character Differentiation (voice switching), Breath support, Pacing over duration |
+| 4 | Nature documentary narration | Narration | Breath support (long sustained phrases), Controlled/Intentional Pacing, Enunciation |
 | 5 | [fill in] | | |
 
-### Theatre (pick 3–5)
+### Theatre (pick 3–5) - Will come to this
 | # | Scenario | Type | Primary Dimensions Targeted |
 |---|---|---|---|
 | 1 | [e.g. dramatic monologue] | Drama | Emotional Intention, Facial Expression |
@@ -159,8 +160,9 @@
 ## 9. MVP Scope
 
 ### In scope
-- [ ] Auth / user accounts
-- [ ] Dashboard with mode selection
+- [ ] Auth / user accounts (Viewing profile as well)
+- [ ] Mode selection from left sidebar on dashboard
+- [ ] Session history persistence and displayed on dashboard
 - [ ] Onboarding flow per mode (first time)
 - [ ] Voice acting session: record + analyze + feedback
 - [ ] Theatre session: record video + analyze + feedback
@@ -173,48 +175,46 @@
 - Persona selection
 - Scene partner / reactive presence analysis
 - Free upload without context
-- Progress tracking over time / session history dashboard
-- Mobile app
+- Progress tracking over time
+- Agentic AI integration
+- Cloudflare/S3 for storage
 
 ---
 
-## 10. Technical Component Map
+## 10. Technical Component Map (Tentative)
 > Don't over-spec here — just enough to validate feasibility before you pick the stack
 
+Backend: Python + FastAPI
+Auth + Persistence: Supabase
+Frontend: React + Typescript
+
 ### Voice Acting pipeline
-- Audio capture → [library TBD]
-- Transcription → [Whisper or API TBD]
-- Prosody analysis (pitch, pace, breath) → [librosa or TBD]
+- Transcription → [Whisper]
+- Prosody analysis (pitch, pace, breath) → [librosa]
 - Filler word detection → transcript post-processing
-- LLM feedback generation → Claude / GPT-4 with structured prompt
+- LLM feedback generation → Undecided
 
 ### Theatre pipeline
-- Video capture → [TBD]
 - Audio → same as voice acting pipeline
 - Facial landmarks + gaze → MediaPipe
 - Pose / gesture → MediaPipe
-- LLM feedback synthesis → Claude / GPT-4 with multimodal input or serialized landmark data
+- LLM feedback synthesis → (Undecided) with multimodal input or serialized landmark data
 
 ---
 
 ## 11. Success Criteria
 > How do you know MVP is done?
 
-- [ ] A user can complete a full voice acting session end-to-end and receive feedback across all 7 dimensions
-- [ ] A user can complete a full theatre session end-to-end and receive feedback across all 5 in-scope dimensions
+- [ ] A user can complete a full voice acting session end-to-end and receive feedback across all 7 dimensions (if all dimensions are applicable to the specific scenario)
+- [ ] A user can complete a full theatre session end-to-end and receive feedback across all 5 in-scope dimensions (again if all 5 are applicable to the specific scenario)
 - [ ] Feedback is anchored to specific moments — not generic
 - [ ] Onboarding data visibly changes the feedback framing (e.g. commercial vs. audiobook feedback reads differently)
-- [ ] [Add any others]
 
 ---
 
 ## Deferred Decisions
 > Things you haven't decided yet that will affect implementation — don't let these block you but track them
 
-- Frontend framework
-- Backend language / framework
 - Hosting / deployment
 - LLM provider (Claude vs. GPT-4)
-- Audio processing library
 - Whether MediaPipe runs client-side or server-side
-- Session storage / database
