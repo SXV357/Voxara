@@ -3,7 +3,7 @@
 
 **Author:** Shreyas Viswanathan 
 
-**Last Updated:** Jun 20, 2026 
+**Last Updated:** Jun 21, 2026 
 
 **Status:** In Progress
 
@@ -21,7 +21,7 @@ While Yoodli for example allows one to choose from ready-made roleplays or even 
 
 When we talk about public speaking in general or communication in a workspace environment, there are a baseline set of things the above platforms optimize for in terms of how they provide feedback. Performance is alive and art is subjective. More so, he human embodied nature of this work means that this humanity needs to be supported and not replaced.
 
-Those that are involved in this space currently don't have a means of effectively practicing between rehearsals. They may take acting or voice lessons with coaches for example, but there is still a need for them to work on their skills outside of that and more importantly be able to receive specific and actionable feedback.
+Those that are involved in this space currently don't have a means of effectively practicing between rehearsals. They may take acting or voice lessons with coaches for example, but there is still a need for them to work on their skills outside of that and more importantly be able to receive specific and actionable feedback. Voxara aims to fill in the gap in terms of supporting the humanity behind voice acting and theatre performances while helping people in these spaces develop their confidence.
 
 ## 2. Target Users
 
@@ -30,14 +30,16 @@ Those that are involved in this space currently don't have a means of effectivel
 - **Subtypes captured at onboarding:** Commercial, Audiobook, Character/Animation, Narration
 
 ### Theatre
-- **Primary:** Student and adult performers, community theatre, drama school students
+- **Primary:** Student performers, community theatre, drama school students
 
 **Experience Level**: This tool will be able to support those who are starting off and those who also have some experience. This will be factored into the onboarding flow which will be used for the personalization aspect.
+
+**Additional Note**: To further scope it, the target users of this application will be high school through college students. It will not account for kids 13 and under, professionals or even adults. Community theatre is an avenue that's open to anyone regardless of age, but the fact still remains that the vast majority of artists are students.
 
 ---
 
 ## 3. Design Constraints
-> These are non-negotiables that scope the product and inform the LLM prompt design.
+> Non-negotiables that scope the product and inform how system prompts are constructed.
 
 - Feedback must function as a **coach, not a judge** — expansive, not evaluative
 - Feedback must be **specific and anchored to moments** in the recording, not generic
@@ -69,7 +71,7 @@ Those that are involved in this space currently don't have a means of effectivel
 - Experience level
 - Goals
 
-> Onboarding data feeds directly into the LLM system prompt for all subsequent sessions — this is why it's worth building even for MVP
+> Onboarding data feeds directly into the LLM system prompt for all subsequent sessions.
 
 ---
 
@@ -77,10 +79,9 @@ Those that are involved in this space currently don't have a means of effectivel
 
 ### Voice Acting Session
 1. User selects a curated scenario (see Section 7)
-2. User reads scenario context + script
-3. User records audio (in-app) 
-4. App processes recording
-5. Feedback screen rendered potentially alongside the audio transcript with timestamps
+2. User is presented with the scenario context and script then records audio (in-app)
+3. App processes recording
+4. Feedback screen rendered potentially alongside the audio transcript with timestamps
 
 ### Theatre Session
 1. User selects a curated scenario
@@ -92,6 +93,8 @@ Those that are involved in this space currently don't have a means of effectivel
 ---
 
 ## 6. Feedback Dimensions
+
+> Note: The listed dimensions are the critical ones but since the user is forced to choose from pre-defined scenarios in the MVP of the application, the scenarios may not appropriately surface all of them. In other words, it may not be possible to present feedback regarding all these aspects as part of a recording.
 
 ### Voice Acting
 | Dimension | Measurable? | Method |
@@ -127,9 +130,9 @@ Those that are involved in this space currently don't have a means of effectivel
 | 2 | Fast Food Commercial | Commercial | Pacing, Energy/Pitch, Enunciation, Filler Words & Flow |
 | 3 | Multi-character audiobook dialogue | Audiobook | Character Differentiation (voice switching), Breath support, Pacing over duration |
 | 4 | Nature documentary narration | Narration | Breath support (long sustained phrases), Controlled/Intentional Pacing, Enunciation |
-| 5 | [fill in] | | |
+| 5 | TBD | | |
 
-### Theatre (pick 3–5) - Will come to this
+### Theatre (pick 3–5) - Deferred until the E2E pipeline for voice acting has been tested and works (still part of the MVP)
 | # | Scenario | Type | Primary Dimensions Targeted |
 |---|---|---|---|
 | 1 | [e.g. dramatic monologue] | Drama | Emotional Intention, Facial Expression |
@@ -143,6 +146,8 @@ Those that are involved in this space currently don't have a means of effectivel
 ## 8. Feedback Format
 
 > Reference: Yoodli's structure is the benchmark — rubric scores for orientation, then specific anchored feedback per dimension, then growth areas with original vs. alternative phrasing
+
+**Note**: As mentioned earlier, the platform must function as a coach and not a judge. The feedback provided should not be flattening performance into "right" vs "wrong" since art is subjective. Furthermore, feedback should be rooted in the performer's goals since that is the reason the onboarding flow exists to capture such details.
 
 ### Structure per session
 - **Summary** — 2-3 sentence overall read, coaching tone
@@ -162,10 +167,10 @@ Those that are involved in this space currently don't have a means of effectivel
 ### In scope
 - [ ] Auth / user accounts (Viewing profile as well)
 - [ ] Mode selection from left sidebar on dashboard
-- [ ] Session history persistence and displayed on dashboard
+- [ ] Session history persistence and displayed on dashboard (User can click an item and are taken to the feedback screen along with either the recording transcript or video + audio transcript)
 - [ ] Onboarding flow per mode (first time)
 - [ ] Voice acting session: record + analyze + feedback
-- [ ] Theatre session: record video + analyze + feedback
+- [ ] Theatre session: record video/audio + analyze + feedback
 - [ ] Curated scenario library (3–5 per mode)
 - [ ] Feedback screen with rubric + growth areas
 
@@ -177,15 +182,16 @@ Those that are involved in this space currently don't have a means of effectivel
 - Free upload without context
 - Progress tracking over time
 - Agentic AI integration
-- Cloudflare/S3 for storage
+- Cloudflare R2/AWS S3 down the line for audio/video storage considering they could get arbitrarily large and Supabase's free tier not being the best supporter
+- Being able to support performers 13 and under (niche area because of COPPA)
 
 ---
 
 ## 10. Technical Component Map (Tentative)
-> Don't over-spec here — just enough to validate feasibility before you pick the stack
-
 Backend: Python + FastAPI
+
 Auth + Persistence: Supabase
+
 Frontend: React + Typescript
 
 ### Voice Acting pipeline
@@ -205,16 +211,18 @@ Frontend: React + Typescript
 ## 11. Success Criteria
 > How do you know MVP is done?
 
-- [ ] A user can complete a full voice acting session end-to-end and receive feedback across all 7 dimensions (if all dimensions are applicable to the specific scenario)
+- [ ] A user can complete a full voice acting session end-to-end and receive feedback across all 7 dimensions (if all dimensions are applicable to the specific scenario otherwise specific, non-judgemental and actionable feedback on the relevant dimensions)
 - [ ] A user can complete a full theatre session end-to-end and receive feedback across all 5 in-scope dimensions (again if all 5 are applicable to the specific scenario)
-- [ ] Feedback is anchored to specific moments — not generic
+- [ ] Feedback is anchored to specific moments — not generic (feedback should be reviewed against the definition of what feedback should look like from interviews conducted with a senior theatre director and a voice coach)
 - [ ] Onboarding data visibly changes the feedback framing (e.g. commercial vs. audiobook feedback reads differently)
+
+**Note**: The above captures the functionality angle which is what matters, but also everything else being in a working state like account creation, profile viewing/updates, onboarding flow, session history, persistence, etc.
 
 ---
 
 ## Deferred Decisions
 > Things you haven't decided yet that will affect implementation — don't let these block you but track them
 
-- Hosting / deployment
-- LLM provider (Claude vs. GPT-4)
-- Whether MediaPipe runs client-side or server-side
+- Hosting / deployment: Not that critical to decide at the time
+- LLM provider - Critical
+- Whether MediaPipe runs client-side or server-side - Undecided
