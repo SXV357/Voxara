@@ -3,7 +3,7 @@
 
 **Author:** Shreyas Viswanathan 
 
-**Last Updated:** Jun 21, 2026 
+**Last Updated:** Jun 22, 2026 
 
 **Status:** In Progress
 
@@ -194,17 +194,24 @@ Auth + Persistence: Supabase
 
 Frontend: React + Typescript
 
+LLMs:
+- OpenRouter (Main ones that will be used)
+  - gpt-oss-120b free (primary)
+  - Gemma 4 31B free (fallback)
+- Ollama (Last fallback if rate limits too much)
+  - Qwen3-Coder 30B
+
+> Note regarding LLMs: The priority in terms of LLMs is not having to pay any money but also getting access to ones with decent context windows and good reasoning abilities. Gemma 4 is a fallback for gpt-oss but the Ollama one exists as a fallback in case rate limits get very strict or the openRouter models don't work. A lot of Ollama models have specific compute requirements and offer full privacy but down the line, these models may be swapped out since they're not intended for production.
+
 ### Voice Acting pipeline
 - Transcription → [Whisper]
 - Prosody analysis (pitch, pace, breath) → [librosa]
 - Filler word detection → transcript post-processing
-- LLM feedback generation → Undecided
 
 ### Theatre pipeline
 - Audio → same as voice acting pipeline
 - Facial landmarks + gaze → MediaPipe
 - Pose / gesture → MediaPipe
-- LLM feedback synthesis → (Undecided) with multimodal input or serialized landmark data
 
 ---
 
@@ -224,5 +231,4 @@ Frontend: React + Typescript
 > Things you haven't decided yet that will affect implementation — don't let these block you but track them
 
 - Hosting / deployment: Not that critical to decide at the time
-- LLM provider - Critical
 - Whether MediaPipe runs client-side or server-side - Undecided
