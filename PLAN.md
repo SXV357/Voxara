@@ -1,10 +1,10 @@
 # Voxara MVP Implementation Plan
 
-**Goal:** Build the Voxara MVP — auth, voice acting session recording, AI-powered structured feedback, and session history — with Theatre tab present but disabled until voice acting E2E is validated.
+**Goal:** Build the Voxara MVP in two phases. **Phase 1:** auth, onboarding, voice acting session recording, AI-powered structured feedback, and session history — fully E2E validated. **Phase 2:** extend to Theatre (adds multimodal analysis e.g. mediapipe facial tracking). Theatre tab is visible but disabled throughout Phase 1.
 
 **Architecture:** React 19 + TypeScript SPA (Rsbuild) proxies to a FastAPI backend. Supabase handles auth, Postgres storage, and audio file storage. Backend runs local Whisper + librosa for audio analysis, then calls OpenRouter for structured LLM feedback.
 
-**Tech Stack:** React 19 + TypeScript + shadcn/ui + Tailwind v4 + React Router v7, FastAPI + Python 3.13 + uv, Supabase (Auth + Postgres + Storage), openai-whisper, librosa, httpx, pydantic-settings
+**Tech Stack:** React 19 + TypeScript + shadcn/ui + Tailwind v4 + React Router v7, FastAPI + Python 3.13 + uv, Supabase (Auth + Postgres + Storage), faster-whisper, librosa, httpx, pydantic-settings
 
 ## Architecture Rationale
 
@@ -12,24 +12,30 @@
 
 **Supabase** — Replaces three separate services (auth server, Postgres, S3) with one. Less infrastructure to manage, fewer credentials, one SDK on both client and server.
 
-**Local Whisper (not a hosted API)** — No per-session cost. Tradeoff: cold-start latency (~10s on first load) and slower processing than a hosted endpoint. Worth it at MVP scale; swap to hosted if processing time becomes a user experience problem.
+**faster-whisper (local, not a hosted API)** — No per-session cost. faster-whisper is a drop-in replacement for openai-whisper built on CTranslate2, optimized for CPU inference. ~2–4x faster transcription and lower memory than openai-whisper on the same hardware, with no GPU required. Tradeoff: still slower than a hosted endpoint. Worth it at MVP scale; swap to hosted if processing time becomes a UX problem.
 
-**OpenRouter** — Model-agnostic layer in front of LLMs. Swap models (or activate the fallback) via env vars, no code changes. LLM availability and rate limits are real operational risks worth hedging against.
+**OpenRouter** — Model-agnostic layer in front of LLMs. Primary model + one fallback model, both via OpenRouter — swap via env vars, no code changes. MVP traffic won't stress OpenRouter rate limits, but keeping a configured fallback costs nothing and guards against model-specific outages. Ollama (available locally) is not included at MVP; add as a deeper fallback post-MVP if offline resilience matters.
 
-**Curated scenarios only** — Knowing the scenario ahead of time lets the backend pass exact `dimensions[]` to the LLM prompt. Freeform input would require the LLM to guess what to measure, which degrades feedback specificity — the core product value.
+**Curated scenarios only (MVP)** — Knowing the scenario ahead of time lets the backend pass exact `dimensions[]` to the LLM prompt, producing specific anchored feedback. Freeform input requires the LLM to infer what to measure, which degrades specificity — the core product value. Freeform session creation is a V2 feature; at that point the prompting strategy will need to handle dimension inference explicitly.
 
 ## Global Constraints
 
 - No singing / musical theatre features anywhere in this plan
-- No freeform session builder — curated scenarios only (4 defined below)
+- No freeform session builder in MVP — curated scenarios only (4 defined); freeform is a V2 feature requiring a different LLM prompting strategy
 - Theatre sidebar entry: visible but disabled (cursor-not-allowed, grayed)
+- Theatre (Phase 2) adds multimodal analysis (mediapipe facial tracking); not in scope until voice acting E2E is fully validated
 - All LLM feedback must be coaching-tone — system prompt enforces "never evaluative"
 - Supabase Storage for audio (not S3/R2 — v2 concern)
 - LLM primary/fallback configured via env vars, not hardcoded
 - Feedback must reference timestamps or quoted transcript phrases — not generic
 - ffmpeg must be installed on the host machine (required by both whisper and librosa for webm)
+- All scenario scripts designed to be spoken in ~60 seconds; actual recording time varies by performer pace and scenario pacing (which is itself a feedback dimension)
 
 ---
+
+## Phase 1A: Setup & Scaffolding
+
+> Goal: app shell running in browser with design system applied, auth working, all routes stubbed. No business logic yet.
 
 ### Task 1: Project Setup & Scaffolding
 
@@ -52,11 +58,11 @@ Three tables to create:
 - [ ] Configure rsbuild: Tailwind PostCSS, `@` alias pointing to `src/`, dev proxy from `/api` → `http://localhost:8000`
 - [ ] Add TypeScript path alias `@/*` → `./src/*`
 - [ ] Create Supabase browser client reading from `process.env.PUBLIC_SUPABASE_URL` and `process.env.PUBLIC_SUPABASE_ANON_KEY`; populate `.env.local` with values from Supabase dashboard > Settings > API
-- [ ] Install backend deps via uv: `pydantic-settings supabase python-jose[cryptography] python-multipart httpx openai-whisper librosa soundfile`
+- [ ] Install backend deps via uv: `pydantic-settings supabase python-jose[cryptography] python-multipart httpx faster-whisper librosa soundfile`
 - [ ] Create pydantic Settings class reading from `.env`: `supabase_url`, `supabase_service_role_key`, `supabase_jwt_secret`, `openrouter_api_key`, `openrouter_primary_model`, `openrouter_fallback_model`
 - [ ] Create Supabase service-role client
 - [ ] Create `get_current_user` auth dependency that decodes Supabase JWT from `Authorization: Bearer` header using `python-jose`; raises 401 on failure
-- [ ] Define core Pydantic models: `VoiceActingProfile` (subtype, experience_level, goals), `FeedbackDimension` (dimension, score 1–5, rationale), `GrowthArea` (issue, where, suggestion), `Feedback` (summary, dimensions[], strengths[], growth_areas[], pronunciation_notes?)
+- [ ] Define core Pydantic models: `VoiceActingProfile` (subtypes: list[str], experience_level: str, goals: str), `FeedbackDimension` (dimension, score 1–5, rationale), `GrowthArea` (issue, where, suggestion), `Feedback` (summary, dimensions[], strengths[], growth_areas[], pronunciation_notes?)
 - [ ] Create stub routers for onboarding, scenarios, sessions, profile — each returning `{"status": "stub"}`
 - [ ] Wire up FastAPI app: CORS (allow `http://localhost:3000`), include all 4 routers under `/api/*`
 - [ ] Create `AuthContext` providing `session`, `user`, `loading` via `supabase.auth.onAuthStateChange`
@@ -84,6 +90,23 @@ Three tables to create:
 
 ---
 
+## Phase 1A → 1B Checkpoint
+
+Before proceeding to business logic, verify:
+- [ ] Both servers start cleanly
+- [ ] Design system tokens render correctly in the browser (check `/#design-preview`)
+- [ ] Auth works end-to-end (sign up, sign in, sign out, protected route redirect)
+- [ ] All stub pages reachable and using `DashboardLayout`
+- [ ] Theatre sidebar entry is visible but unclickable
+
+This is the design iteration point. If the shell layout, typography, spacing, or component feel needs work, iterate here — with or without `/impeccable` — before any business logic is built on top of it. Changes to layout structure are cheap now, expensive later.
+
+---
+
+## Phase 1B: Business Logic
+
+> Goal: full voice acting E2E — onboarding → scenario selection → recording → AI feedback → session history.
+
 ### Task 3: Voice Acting Onboarding
 
 **Interfaces:**
@@ -92,7 +115,7 @@ Three tables to create:
 
 **Steps:**
 - [ ] Implement `POST /api/onboarding/voice-acting`: validates body as `VoiceActingProfile`, updates `profiles.voice_acting_profile` in Supabase for the current user.
-- [ ] Build `OnboardingVoiceActingPage`: form with three fields — subtype (Select: Commercial / Audiobook / Character & Animation / Narration), experience level (Select: Just starting out / Some experience / Intermediate), goals (Checkboxes: reduce fillers, character differentiation, mic technique, pacing, expressiveness). Requires all fields + at least one goal. On submit, POST to backend; on success navigate to `/voice-acting/scenarios`.
+- [ ] Build `OnboardingVoiceActingPage`: form with three fields — subtypes (multi-select checkboxes: Commercial / Audiobook / Character & Animation / Narration; at least one required), experience level (Select: Just starting out / Some experience / Intermediate), goals (freeform textarea: user describes what they're working on in their own words; required). On submit, POST to backend; on success navigate to `/voice-acting/scenarios`.
 - [ ] Add onboarding guard to `ScenarioSelectionPage`: on mount, fetch profile and redirect to `/onboarding/voice-acting` if `voice_acting_profile` is null.
 - [ ] Manual test: new user → clicking "Voice Acting" redirects to onboarding; fill form → submit → lands on scenarios (blank); Supabase profiles table shows populated `voice_acting_profile`; refresh scenarios page → no redirect
 - [ ] Commit: `feat: voice acting onboarding flow`
@@ -134,6 +157,8 @@ Three tables to create:
 
 > **Why MediaRecorder (browser-native, no library):** MediaRecorder is supported in all modern browsers and produces webm/opus natively — no client dependency needed. The tradeoff is that webm can't be processed directly by Whisper or librosa; ffmpeg on the server handles conversion (see Task 6).
 
+> **Why scripts are designed for ~60 seconds:** All four MVP scenarios (commercial, villain monologue, multi-character scene, nature documentary) are scripted to be deliverable in roughly 60 seconds. Commercials are 15–60s by industry standard; anime-style villain monologues are punchy and declarative (~20–40s of delivery); multi-character exchanges cover 2–3 back-and-forths; narration units are standard at 60s. Actual recording time will vary — performers speak at different paces, and pacing is itself a feedback dimension. This is a script design constraint, not a hard recording cutoff. It keeps Whisper `base` processing time at ~15–30s (acceptable UX) and ensures full timestamp sending stays token-efficient.
+
 **`useAudioRecorder` hook states:** `idle` → `recording` → `stopped`. Exposes: `start()`, `stop()`, `reset()`, `audioBlob`, `audioUrl` (object URL for playback).
 
 **Steps:**
@@ -153,9 +178,9 @@ Three tables to create:
 
 > **Why ffmpeg is required:** Browser MediaRecorder outputs webm/opus. Both Whisper and librosa need PCM audio (WAV, 16kHz mono). This conversion is unavoidable — ffmpeg is the standard tool for it. This is the main host environment prerequisite; the pipeline will silently fail without it.
 
-> **Why Whisper `base` model as default:** Base (~140MB) runs on CPU and processes a 60s clip in ~15–30s. The `small` model is ~4x slower for marginal accuracy gain on clear close-mic speech. Voice acting is deliberate delivery — base accuracy is sufficient. Caveat: if users record in noisy environments or with strong accents, `small` may be worth the latency cost.
+> **Why faster-whisper `base` model as default:** faster-whisper `base` (~140MB) runs on CPU with CTranslate2 optimizations, processing a 60s clip in ~8–15s (roughly 2x faster than openai-whisper on the same hardware). The `small` model offers marginal accuracy gain for deliberate close-mic voice acting delivery and is noticeably slower. Base is sufficient for MVP; swap to `small` if users with strong accents or noisy environments report transcript errors.
 
-> **Why only the first 40 word timestamps go to the LLM:** LLM token cost. 40 words covers ~15–20 seconds of speech — enough for the model to anchor feedback to specific moments. Sending the full word list for a 2-minute recording balloons cost with diminishing returns; the feedback doesn't meaningfully improve past the first ~20 seconds of examples.
+> **Why full word timestamps go to the LLM:** Feedback anchored to specific moments requires timestamps across the full recording — a notable moment can occur anywhere, not just the opening seconds. With all four scenarios scripted for ~60 seconds (~150 words max), the full timestamp list is ~150 JSON objects — negligible token cost well within the model's 131k context window.
 
 > **Why feedback must reference timestamps (the constraint):** Without this, LLMs default to generic coaching ("great energy!") that has no actionable value. Requiring timestamp or quote anchoring forces specificity. The tradeoff: the LLM prompt must be carefully engineered to produce valid references, and the output needs validation.
 
@@ -167,7 +192,7 @@ Three tables to create:
 3. Whisper transcribes WAV with `word_timestamps=True` → full transcript text + per-word timestamps
 4. librosa analyzes WAV → pitch mean/std/range (via `pyin`), tempo (via `beat_track`), RMS energy mean/std
 5. Filler word detection scans word list for: um, uh, like, basically, actually, literally, right, so, "you know"
-6. LLM prompt assembled with: performer profile, scenario context, dimensions to evaluate, full transcript, first 40 word timestamps, prosody data, filler count
+6. LLM prompt assembled with: performer profile, scenario context, dimensions to evaluate, full transcript, full word timestamps, prosody data, filler count
 7. OpenRouter called with primary model; falls back to fallback model on any error
 8. LLM response validated as `Feedback` Pydantic model
 9. Session row inserted into Supabase with all analysis data + feedback JSON
@@ -224,7 +249,7 @@ Three tables to create:
 **Steps:**
 - [ ] Implement `GET /api/profile/` and `PATCH /api/profile/voice-acting` endpoints.
 - [ ] Build `DashboardPage`: heading + "New Session" button. Fetches session list on mount. Renders clickable cards showing scenario title, feedback summary preview (line-clamp), and date. Clicking navigates to `/sessions/:id/feedback`. Empty state message if no sessions.
-- [ ] Build `ProfilePage`: shows user email. Form pre-populated from `GET /api/profile/` with same fields as onboarding (subtype, experience level, goals). On save, PATCHes `/api/profile/voice-acting`. Shows "Saved!" confirmation for 2 seconds.
+- [ ] Build `ProfilePage`: shows user email. Form pre-populated from `GET /api/profile/` with same fields as onboarding — subtypes (multi-select checkboxes, same options), experience level (same select), goals (freeform textarea pre-populated with saved value). On save, PATCHes `/api/profile/voice-acting`. Shows "Saved!" confirmation for 2 seconds.
 - [ ] Manual test: complete 2 sessions → dashboard shows both clickable cards; click → correct feedback page; profile shows current onboarding data; edit + save → changes persist; do another session → feedback framing reflects updated profile
 - [ ] Commit: `feat: session history dashboard + profile page with editable voice acting settings`
 
