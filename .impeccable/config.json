@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "reason": "Plus Jakarta Sans is the font specified in DESIGN.md — this file renders that token, not an independent design choice",
+        "createdAt": "2026-06-28T03:34:39.211Z"
+      }
+    ]
+  }
+}

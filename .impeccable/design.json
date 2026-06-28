@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-28T00:00:00.000Z",
+  "title": "Design System: Voxara",
+  "extensions": {
+    "colorMeta": {
+      "studio-crimson": {
+        "role": "primary",
+        "displayName": "Studio Crimson",
+        "canonical": "oklch(0.50 0.170 27)",
+        "tonalRamp": [
+          "oklch(0.15 0.100 27)",
+          "oklch(0.25 0.140 27)",
+          "oklch(0.35 0.160 27)",
+          "oklch(0.45 0.168 27)",
+          "oklch(0.50 0.170 27)",
+          "oklch(0.60 0.165 27)",
+          "oklch(0.72 0.140 27)",
+          "oklch(0.86 0.090 27)"
+        ]
+      },
+      "coaching-amber": {
+        "role": "secondary",
+        "displayName": "Coaching Amber",
+        "canonical": "oklch(0.68 0.140 72)",
+        "tonalRamp": [
+          "oklch(0.20 0.080 72)",
+          "oklch(0.32 0.100 72)",
+          "oklch(0.44 0.120 72)",
+          "oklch(0.56 0.132 72)",
+          "oklch(0.68 0.140 72)",
+          "oklch(0.76 0.120 72)",
+          "oklch(0.86 0.090 72)",
+          "oklch(0.94 0.050 72)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral-bg",
+        "displayName": "Canvas",
+        "canonical": "oklch(0.980 0.008 72)",
+        "tonalRamp": [
+          "oklch(0.10 0.008 72)",
+          "oklch(0.25 0.008 72)",
+          "oklch(0.40 0.008 72)",
+          "oklch(0.55 0.008 72)",
+          "oklch(0.68 0.008 72)",
+          "oklch(0.80 0.008 72)",
+          "oklch(0.90 0.008 72)",
+          "oklch(0.980 0.008 72)"
+        ]
+      },
+      "studio-surface": {
+        "role": "neutral-surface",
+        "displayName": "Studio Surface",
+        "canonical": "oklch(0.945 0.016 72)",
+        "tonalRamp": [
+          "oklch(0.15 0.016 72)",
+          "oklch(0.28 0.016 72)",
+          "oklch(0.42 0.016 72)",
+          "oklch(0.56 0.016 72)",
+          "oklch(0.70 0.016 72)",
+          "oklch(0.80 0.016 72)",
+          "oklch(0.90 0.016 72)",
+          "oklch(0.945 0.016 72)"
+        ]
+      },
+      "studio-warm": {
+        "role": "neutral-hover",
+        "displayName": "Studio Warm",
+        "canonical": "oklch(0.900 0.028 72)",
+        "tonalRamp": [
+          "oklch(0.15 0.028 72)",
+          "oklch(0.28 0.028 72)",
+          "oklch(0.42 0.028 72)",
+          "oklch(0.56 0.028 72)",
+          "oklch(0.68 0.028 72)",
+          "oklch(0.78 0.028 72)",
+          "oklch(0.86 0.028 72)",
+          "oklch(0.900 0.028 72)"
+        ]
+      },
+      "ink": {
+        "role": "neutral-text",
+        "displayName": "Ink",
+        "canonical": "oklch(0.15 0.025 27)",
+        "tonalRamp": [
+          "oklch(0.15 0.025 27)",
+          "oklch(0.25 0.025 27)",
+          "oklch(0.35 0.025 27)",
+          "oklch(0.45 0.025 27)",
+          "oklch(0.55 0.025 27)",
+          "oklch(0.65 0.025 27)",
+          "oklch(0.78 0.022 27)",
+          "oklch(0.92 0.015 27)"
+        ]
+      },
+      "muted": {
+        "role": "neutral-text-secondary",
+        "displayName": "Muted",
+        "canonical": "oklch(0.50 0.018 27)",
+        "tonalRamp": [
+          "oklch(0.15 0.018 27)",
+          "oklch(0.25 0.018 27)",
+          "oklch(0.35 0.018 27)",
+          "oklch(0.45 0.018 27)",
+          "oklch(0.50 0.018 27)",
+          "oklch(0.60 0.018 27)",
+          "oklch(0.72 0.015 27)",
+          "oklch(0.86 0.010 27)"
+        ]
+      },
+      "input-border": {
+        "role": "neutral-border",
+        "displayName": "Input Border",
+        "canonical": "oklch(0.85 0.010 27)",
+        "tonalRamp": [
+          "oklch(0.20 0.010 27)",
+          "oklch(0.33 0.010 27)",
+          "oklch(0.45 0.010 27)",
+          "oklch(0.58 0.010 27)",
+          "oklch(0.68 0.010 27)",
+          "oklch(0.78 0.010 27)",
+          "oklch(0.85 0.010 27)",
+          "oklch(0.94 0.008 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles and session headings. Used once per screen, never in repeating components." },
+      "headline": { "displayName": "Headline", "purpose": "Card headings, section headings within feedback view, scenario titles." },
+      "title": { "displayName": "Title", "purpose": "Sidebar nav labels, form section headings, rubric dimension names." },
+      "body": { "displayName": "Body", "purpose": "All prose — feedback summary, scenario context, growth area descriptions. Max 65–72ch." },
+      "label": { "displayName": "Label", "purpose": "Badges, timestamps, dimension score labels, metadata, form labels. Never uppercase-tracked eyebrows." }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 2px 8px oklch(0.15 0.025 27 / 0.08)",
+        "purpose": "Applied on hover to interactive session history cards alongside Studio Warm background shift. Not used at rest."
+      },
+      {
+        "name": "lift",
+        "value": "0 4px 16px oklch(0.15 0.025 27 / 0.12)",
+        "purpose": "Reserved for dropdown menus, command palette, and overlaid panels. Never on static content."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "150ms ease-out",
+        "purpose": "Default easing for all state changes: hover, focus, active. Background, border-color, box-shadow."
+      },
+      {
+        "name": "recording-pulse",
+        "value": "opacity 1s ease-in-out infinite (1 → 0.4 → 1)",
+        "purpose": "Recording state indicator dot only. The only continuous animation in the product."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Studio Crimson fill. The only use of crimson as a background. Primary CTA and record actions only.",
+      "html": "<button class=\"ds-btn-primary\">Start Recording</button>",
+      "css": ".ds-btn-primary { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 500; background: oklch(0.50 0.170 27); color: #ffffff; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; transition: background 150ms ease-out; outline: none; line-height: 1.4; } .ds-btn-primary:hover { background: oklch(0.40 0.170 27); } .ds-btn-primary:focus-visible { outline: 2px solid oklch(0.50 0.170 27); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "No fill, ink text, warm input-border stroke. Warms to Studio Warm on hover.",
+      "html": "<button class=\"ds-btn-ghost\">View Details</button>",
+      "css": ".ds-btn-ghost { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 500; background: transparent; color: oklch(0.15 0.025 27); padding: 10px 20px; border-radius: 6px; border: 1px solid oklch(0.85 0.010 27); cursor: pointer; transition: background 150ms ease-out; outline: none; line-height: 1.4; } .ds-btn-ghost:hover { background: oklch(0.900 0.028 72); } .ds-btn-ghost:focus-visible { outline: 2px solid oklch(0.50 0.170 27); outline-offset: 2px; }"
+    },
+    {
+      "name": "Disabled Button",
+      "kind": "button",
+      "refersTo": "button-disabled",
+      "description": "Studio Surface bg, Muted text. No crimson. cursor: not-allowed.",
+      "html": "<button class=\"ds-btn-disabled\" disabled>Theatre Mode</button>",
+      "css": ".ds-btn-disabled { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 500; background: oklch(0.945 0.016 72); color: oklch(0.50 0.018 27); padding: 10px 20px; border-radius: 6px; border: 1px solid oklch(0.85 0.010 27); cursor: not-allowed; line-height: 1.4; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Studio Surface bg, warm input-border stroke, 6px radius. Focus shifts border to Ink. No glow or halo.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\">Session Title</label><input class=\"ds-input\" type=\"text\" placeholder=\"e.g. Chekhov Scene Study\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-label { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.15 0.025 27); } .ds-input { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; background: oklch(0.945 0.016 72); color: oklch(0.15 0.025 27); border: 1px solid oklch(0.85 0.010 27); border-radius: 6px; padding: 10px 12px; outline: none; transition: border-color 150ms ease-out; display: block; width: 100%; box-sizing: border-box; } .ds-input:focus { border-color: oklch(0.15 0.025 27); } .ds-input::placeholder { color: oklch(0.50 0.018 27); }"
+    },
+    {
+      "name": "Text Input — Error",
+      "kind": "input",
+      "refersTo": "input-error",
+      "description": "Border shifts to Studio Crimson. Error message in warm-shifted red below the field.",
+      "html": "<div class=\"ds-field-err\"><label class=\"ds-label-err\">Scene Number</label><input class=\"ds-input-err\" type=\"text\" value=\"xyz\" /><span class=\"ds-err-msg\">Must be a number between 1 and 99.</span></div>",
+      "css": ".ds-field-err { display: flex; flex-direction: column; gap: 6px; } .ds-label-err { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.15 0.025 27); } .ds-input-err { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; background: oklch(0.945 0.016 72); color: oklch(0.15 0.025 27); border: 1px solid oklch(0.50 0.170 27); border-radius: 6px; padding: 10px 12px; outline: none; display: block; width: 100%; box-sizing: border-box; } .ds-err-msg { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; color: oklch(0.50 0.170 27); }"
+    },
+    {
+      "name": "Static Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Studio Surface bg, 8px radius, 16px padding. No border, no shadow at rest. Tonal separation from Canvas defines the boundary.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-headline\">Voice Acting — Scene 4</div><div class=\"ds-card-meta\">recorded 12 min ago · 2m 14s</div><div class=\"ds-card-body\">Strong emotional grounding in the opening. Your breath control is improving — the pause before \"not anymore\" landed cleanly this time.</div></div>",
+      "css": ".ds-card { background: oklch(0.945 0.016 72); border-radius: 8px; padding: 16px; max-width: 320px; } .ds-card-headline { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 1.25rem; font-weight: 600; line-height: 1.3; color: oklch(0.15 0.025 27); } .ds-card-meta { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.50 0.018 27); margin-top: 4px; } .ds-card-body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; line-height: 1.6; color: oklch(0.15 0.025 27); margin-top: 12px; max-width: 65ch; }"
+    },
+    {
+      "name": "Interactive Card",
+      "kind": "card",
+      "refersTo": "card-interactive",
+      "description": "Warms to Studio Warm on hover, gains Float shadow. Background shift is the primary interactivity signal.",
+      "html": "<div class=\"ds-card-i\"><div class=\"ds-card-i-title\">Emotional Authenticity</div><div class=\"ds-pips\"><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip\"></div><div class=\"ds-pip\"></div></div><div class=\"ds-card-i-body\">The final beat feels performed rather than felt. Try anchoring to a specific memory before the line.</div></div>",
+      "css": ".ds-card-i { background: oklch(0.945 0.016 72); border-radius: 8px; padding: 20px; max-width: 320px; cursor: pointer; transition: background 150ms ease-out, box-shadow 150ms ease-out; } .ds-card-i:hover { background: oklch(0.900 0.028 72); box-shadow: 0 2px 8px oklch(0.15 0.025 27 / 0.08); } .ds-card-i-title { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 1rem; font-weight: 500; line-height: 1.4; color: oklch(0.15 0.025 27); } .ds-pips { display: flex; gap: 4px; margin-top: 12px; } .ds-pip { width: 20px; height: 5px; border-radius: 4px; background: oklch(0.945 0.016 72); border: 1px solid oklch(0.85 0.010 27); } .ds-pip--on { background: oklch(0.50 0.170 27); border: none; } .ds-card-i-body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.875rem; line-height: 1.6; color: oklch(0.15 0.025 27); margin-top: 12px; max-width: 65ch; }"
+    },
+    {
+      "name": "Feedback Score Pips",
+      "kind": "custom",
+      "refersTo": "card-interactive",
+      "description": "Signature component. Five 20×5px rectangles, 4px radius, 4px gap. Filled pips: Studio Crimson. Unfilled: Studio Surface with warm-gray border.",
+      "html": "<div class=\"ds-score\"><div class=\"ds-score-label\">Vocal Clarity</div><div class=\"ds-score-pips\"><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip ds-pip--on\"></div><div class=\"ds-pip\"></div></div></div>",
+      "css": ".ds-score { display: flex; flex-direction: column; gap: 4px; } .ds-score-label { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.50 0.018 27); } .ds-score-pips { display: flex; gap: 4px; } .ds-pip { width: 20px; height: 5px; border-radius: 4px; background: oklch(0.945 0.016 72); border: 1px solid oklch(0.85 0.010 27); } .ds-pip--on { background: oklch(0.50 0.170 27); border: none; }"
+    },
+    {
+      "name": "Recording Indicator",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "10px Studio Crimson circle pulsing at 1s ease-in-out. The only continuous animation in the product.",
+      "html": "<div class=\"ds-rec\"><div class=\"ds-rec-dot\"></div><span class=\"ds-rec-label\">Recording</span></div>",
+      "css": "@keyframes ds-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } } .ds-rec { display: flex; align-items: center; gap: 8px; } .ds-rec-dot { width: 10px; height: 10px; border-radius: 50%; background: oklch(0.50 0.170 27); animation: ds-pulse 1s ease-in-out infinite; } @media (prefers-reduced-motion: reduce) { .ds-rec-dot { animation: none; } } .ds-rec-label { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.50 0.170 27); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Studio Anteroom",
+    "overview": "The room before the recording booth. Warm, quiet, prepared — the kind of space that puts you at ease before the work begins. Voxara's interface occupies the same register: it creates the conditions for a real coaching experience and makes you want to be here. When a student sees their feedback, the UI should feel like someone who genuinely cares sat down with them, pointed at specific moments, and said exactly what to try next.\n\nColor is restrained and purposeful. Warmth comes from the amber that runs through the surfaces — not from decoration, but from the material quality of the space itself. A deep warm crimson anchors the identity on primary actions. The surface is a warm near-white that has genuine presence without weight. Every screen has one job; none of them feel like work.\n\nReferences: Notion (information with typographic care), Pitch (focused creative-professional, generous spacing), Are.na (calm, open, non-institutional). All three feel like spaces, not tools.",
+    "keyCharacteristics": [
+      "Warm without being cozy: inviting, not casual",
+      "Craft-focused: the UI signals that what you're doing here is serious and worth your time",
+      "Light and open: no visual weight that competes with the work",
+      "Coaching-toned: the vocabulary of the UI matches the vocabulary of a supportive coach",
+      "Restrained motion that communicates state, not decoration"
+    ],
+    "rules": [
+      { "name": "The Scarcity Rule", "body": "Studio Crimson appears on ≤15% of any given screen. It marks the single most important interactive moment — the recording button, the primary CTA, the active sidebar item. When everything is red, nothing is. Reserve it, and it earns its weight.", "section": "colors" },
+      { "name": "The Warmth Rule", "body": "Structural warmth comes from Coaching Amber and Studio Warm, not from the surface tint alone. When a card or nav item is hovered or active, it should warm — not just darken or shadow. Warmth is the primary interactivity signal; shadow is secondary.", "section": "colors" },
+      { "name": "The Light-Is-The-Default Rule", "body": "Surfaces stay light. The warmth is in the character of the light, not in reducing it. Dark surfaces belong to a different product.", "section": "colors" },
+      { "name": "The No Blue-Purple Rule", "body": "No blue, indigo, or purple in the palette. These are the generic tech defaults and contradict the creative-professional character Voxara is building.", "section": "colors" },
+      { "name": "The Single Family Rule", "body": "Plus Jakarta Sans only. No display font pairings, no serif headings for character. Brand character comes from the crimson and the quality of information hierarchy — not from typographic mixing.", "section": "typography" },
+      { "name": "The No Eyebrow Rule", "body": "Small all-caps tracked labels above every section heading are prohibited. They read as AI scaffold. Section names live in the heading hierarchy itself, or are simply absent when context is established by navigation.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Elements are flat at rest. Shadow appears only as a response to state (hover on interactive cards) or structural float (dropdowns, overlays).", "section": "elevation" },
+      { "name": "The Warmth-Before-Shadow Rule", "body": "When signaling interactivity on hover, shift background to Studio Warm first. Add Float shadow if additional depth is needed. Warmth is the primary signal; shadow is the secondary.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Studio Crimson only on primary interactive moments: the record button, primary CTA, active nav indicator. Its scarcity is what makes it mean something.",
+      "Do use Studio Warm as the primary hover/active signal on cards and sidebar items. Warmth communicates interactivity before any other visual change.",
+      "Do let Coaching Amber carry structural warmth beyond badges — hover tints, active section backgrounds, score pips. It is the warmth of the room, not just a data color.",
+      "Do present feedback in a clear visual hierarchy: summary → dimension scores → strengths → growth areas.",
+      "Do use tonal layering (Canvas → Studio Surface → Studio Warm) to define layers and states rather than shadows.",
+      "Do give every interactive component its full state vocabulary: default, hover, focus, active, disabled.",
+      "Do keep body text at Ink (oklch(0.15 0.025 27)) on Canvas backgrounds. Muted text is for secondary information only.",
+      "Do cap body prose at 65–72ch.",
+      "Do write UI copy in the coaching register: direct, specific, encouraging.",
+      "Do keep transitions at 150–250ms with ease-out curves."
+    ],
+    "donts": [
+      "Don't use pure white (oklch(1.000 0.000 0)) for Canvas. The warmth requires the amber tilt.",
+      "Don't use Studio Warm for text or borders. Background-only.",
+      "Don't use enterprise SaaS patterns: dashboard hero metrics, feature grids, navy-and-blue palettes, corporate tone.",
+      "Don't use gamification UI (streaks, XP bars, confetti). Voxara is serious skill development.",
+      "Don't use a dark/gothic aesthetic. The brief explicitly excludes it.",
+      "Don't use blue or purple anywhere in the palette.",
+      "Don't use gradient text (background-clip: text). Single solid color only.",
+      "Don't use side-stripe borders (border-left > 1px as colored accent).",
+      "Don't write vague feedback UI copy. Every piece of text should name a moment, quote a phrase, give a timestamp.",
+      "Don't use motion for decoration. The only continuous animation is the recording pulse.",
+      "Don't build modal-first flows. Inline or separate screens instead."
+    ]
+  }
+}
