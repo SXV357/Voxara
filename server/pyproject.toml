@@ -1,8 +1,16 @@
 [project]
-name = "server"
+name = "Voxara API"
 version = "0.1.0"
-description = "Add your description here"
+description = "Voxara API enabling auth and session recording/management across voice acting + theatre"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.138.0",
+    "faster-whisper>=1.2.1",
+    "httpx>=0.28.1",
+    "librosa>=0.11.0",
+    "pydantic-settings>=2.14.2",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.32",
+    "soundfile>=0.14.0",
+    "supabase>=2.31.0",
 ]

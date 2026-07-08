@@ -1,30 +1,34 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { LoginPage } from '@/pages/LoginPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { OnboardingVoiceActingPage } from '@/pages/OnboardingVoiceActingPage';
+import { ScenarioSelectionPage } from '@/pages/ScenarioSelectionPage';
+import { RecordingPage } from '@/pages/RecordingPage';
+import { FeedbackPage } from '@/pages/FeedbackPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 import DesignSystemPreview from './DesignSystemPreview';
-import './App.css';
 
-const useHash = () => {
-  const [hash, setHash] = useState(window.location.hash);
-  useEffect(() => {
-    const handler = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', handler);
-    return () => window.removeEventListener('hashchange', handler);
-  }, []);
-  return hash;
-};
-
-const App = () => {
-  const hash = useHash();
-
-  if (hash === '#design-preview') {
-    return <DesignSystemPreview />;
-  }
+export default function App() {
+  if (window.location.hash === '#design-preview') return <DesignSystemPreview />;
 
   return (
-    <div className="content">
-      <h1>Rsbuild with React</h1>
-      <p>Start building amazing things with Rsbuild.</p>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/onboarding/voice-acting" element={<OnboardingVoiceActingPage />} />
+            <Route path="/voice-acting/scenarios" element={<ScenarioSelectionPage />} />
+            <Route path="/voice-acting/record/:scenarioId" element={<RecordingPage />} />
+            <Route path="/sessions/:sessionId/feedback" element={<FeedbackPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
-};
-
-export default App;
+}

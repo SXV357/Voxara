@@ -2,7 +2,7 @@
 
 ## Project Docs
 
-- `PLAN.md` — ongoing implementation plan. Read before starting any non-trivial feature; it tracks architecture decisions, phase breakdown, and global constraints.
+- `PLAN.md` — ongoing implementation plan. Read before starting any non-trivial feature; it tracks architecture decisions, phase breakdown, and global constraints. Based on `PRD.md`
 - `DESIGN.md` — design system source of truth. All color tokens, typography, spacing, elevation, and component specs live here.
 
 ## Frontend
