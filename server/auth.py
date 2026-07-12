@@ -13,12 +13,14 @@ w/o any downtime
 
 previously used still trusted for verification - valid for verification only
 but not for signing any new tokens
+
+instead of fetching the public key set every time for token signature verification
+we fetch it the first time and cache it
 '''
 
 # pulls 'Authorization: Bearer <token>' header off any request so no manual parsing
 # if the header format is correct, it injects credentials object into function
 bearer = HTTPBearer()
-
 
 @lru_cache
 def get_jwks() -> dict:

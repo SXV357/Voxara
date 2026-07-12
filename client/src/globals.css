@@ -17,6 +17,20 @@
   --radius-input: 6px;
   --radius-pip: 4px;
 
+  --text-display: 1.75rem;
+  --text-display--line-height: 1.2;
+  --text-headline: 1.25rem;
+  --text-headline--line-height: 1.3;
+  --text-title: 1rem;
+  --text-title--line-height: 1.4;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.6;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.4;
+
+  --shadow-float: 0 2px 8px oklch(0.15 0.025 27 / 0.08);
+  --shadow-lift: 0 4px 16px oklch(0.15 0.025 27 / 0.12);
+
   /* shadcn/ui CSS variable mapping */
   --background: oklch(0.980 0.008 72);
   --foreground: oklch(0.15 0.025 27);

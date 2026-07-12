@@ -1,60 +1,61 @@
-# Phase 1A Task 1 — Project Scaffolding
+# Changes
 
-## Frontend (`client/`)
+Organized by area, not by session. Each item explains what changed and why, in plain terms. Manual steps you still need to run are pulled into their own section at the bottom.
 
-### Dependencies installed
-- `react-router-dom`, `@supabase/supabase-js`, `lucide-react`, `tailwindcss`, `@tailwindcss/postcss`
-- `clsx`, `tailwind-merge`, `class-variance-authority`, `@radix-ui/react-slot` (shadcn peer deps)
+## Frontend scaffolding (`client/`)
 
-### Config changes
-- `rsbuild.config.ts` — Tailwind PostCSS plugin, `@` alias → `./src`, dev proxy `/api` → `http://localhost:8000`
-- `tsconfig.json` — added `paths: { "@/*": ["./src/*"] }`
-- `components.json` — shadcn config (style: default, base: slate, CSS variables on)
+**Stack:** React Router v7, Tailwind v4, shadcn/ui, Supabase JS client, lucide-react icons.
 
-### New files
-- `src/globals.css` — Tailwind v4 `@import` + `@theme` block with all Voxara design tokens (studio-crimson, coaching-amber, canvas, studio-surface, studio-warm, ink, muted) mapped to shadcn CSS variables
-- `src/lib/utils.ts` — `cn()` helper (`clsx` + `tailwind-merge`)
-- `src/lib/supabase.ts` — Supabase browser client reading `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_ANON_KEY`
-- `src/contexts/AuthContext.tsx` — `AuthProvider` + `useAuth()` hook; tracks session via `onAuthStateChange`
-- `src/components/ProtectedRoute.tsx` — shows loading state, redirects to `/login` if no session, renders `<Outlet />` if authenticated
-- `src/components/ui/` — 11 shadcn components: `button`, `input`, `label`, `card`, `select`, `textarea`, `checkbox`, `badge`, `separator`, `tabs`, `progress`
-- `src/pages/` — 7 stub pages: `LoginPage`, `DashboardPage`, `OnboardingVoiceActingPage`, `ScenarioSelectionPage`, `RecordingPage`, `FeedbackPage`, `ProfilePage`
-- `.env.local` — template (fill with real values from Supabase dashboard → Settings → API)
+- `src/globals.css` — design tokens (colors, radius, type scale, shadows) live here as Tailwind `@theme` variables, matching `DESIGN.md`. Anything visual should pull from these rather than hardcoding a value.
+- `src/lib/supabase.ts` — the Supabase browser client. Sessions persist in `localStorage` by default (this matters — see Auth section below).
+- `src/contexts/AuthContext.tsx` — `useAuth()` hook exposing `session`/`user`/`loading`, tracked via Supabase's `onAuthStateChange`.
+- `src/components/ProtectedRoute.tsx` — redirects to `/login` if there's no session; wraps every authenticated page.
+- `src/components/DashboardLayout.tsx` + `src/components/Sidebar.tsx` — the shell (sidebar + scrollable content) for every authenticated page. Applied once as a parent route in `App.tsx` rather than imported into each page individually — one place to change the shell later, and the six page files stay untouched.
+- `src/pages/` — `LoginPage` (built out, see Auth below); `DashboardPage`, `OnboardingVoiceActingPage`, `ScenarioSelectionPage`, `RecordingPage`, `FeedbackPage`, `ProfilePage` (still stubs).
+- `src/components/ui/` — shadcn primitives (`button`, `input`, `label`, `card`, `select`, `textarea`, `checkbox`, `badge`, `separator`, `tabs`, `progress`).
 
-### Modified files
-- `src/App.tsx` — replaced placeholder with full router: `BrowserRouter` + `AuthProvider`, all 7 routes under `ProtectedRoute`, catch-all → `/dashboard`, hash check for `#design-preview`
-- `src/index.tsx` — added `import './globals.css'`
+## Backend scaffolding (`server/`)
 
-### Deleted
-- `src/App.css` — dead file (no longer imported); Plus Jakarta Sans is intentional per DESIGN.md
+**Stack:** FastAPI, Supabase Python client, `python-jose` for JWT verification, faster-whisper + librosa (audio analysis, not wired up yet).
 
----
+- `config.py` — typed settings read from `.env`.
+- `database.py` — Supabase service-role client (server-side, full access — never expose this key to the frontend).
+- `auth.py` — `get_current_user` dependency. Verifies the JWT Supabase issues against its public key set (ES256), rather than a shared secret — this is why it calls `/.well-known/jwks.json` instead of just checking a password-like secret. The key set is cached (`@lru_cache`) since it only changes on key rotation, not per-request.
+- `models.py` — Pydantic models for the feedback/profile data shapes the app will produce later.
+- `routers/*.py` — four routers (`onboarding`, `scenarios`, `sessions`, `profile`), all still stub endpoints returning `{"status": "stub"}`.
+- `main.py` — mounts the routers under `/api`, CORS allowed for `localhost:3000`.
 
-## Backend (`server/`)
+## Design system fixes
 
-### Dependencies added (uv)
-`pydantic-settings`, `supabase`, `python-jose[cryptography]`, `python-multipart`, `httpx`, `faster-whisper`, `librosa`, `soundfile`
+A few gaps between `DESIGN.md` (the spec) and the actual components, found and fixed as the login page got built out:
 
-### New files
-- `config.py` — `Settings` (pydantic-settings, reads `.env`): `supabase_url`, `supabase_service_role_key`, `supabase_jwt_secret`, `openrouter_api_key`, `openrouter_primary_model`, `openrouter_fallback_model`
-- `database.py` — Supabase service-role client singleton
-- `models.py` — core Pydantic models: `VoiceActingProfile`, `FeedbackDimension`, `GrowthArea`, `Feedback`
-- `auth.py` — `get_current_user` FastAPI dependency; decodes Supabase JWT via `python-jose`, raises 401 on failure
-- `routers/onboarding.py` — `POST /api/onboarding/voice-acting` → stub
-- `routers/scenarios.py` — `GET /api/scenarios/voice-acting`, `GET /api/scenarios/{id}` → stubs
-- `routers/sessions.py` — `POST /api/sessions/voice-acting`, `GET /api/sessions/`, `GET /api/sessions/{id}` → stubs
-- `routers/profile.py` — `GET /api/profile/`, `PATCH /api/profile/voice-acting` → stubs
-- `.env` — template (fill with real values from Supabase dashboard)
+| What | Why it was wrong | Fix |
+|---|---|---|
+| Type scale (Display/Headline/Title/Body/Label) | Colors and radius were already tokens in `globals.css`; type sizes were described in `DESIGN.md` but never turned into usable classes, so pages fell back to generic defaults | Added `--text-display` etc. to `@theme` — same pattern as the existing color tokens |
+| Shadow vocabulary (Float/Lift) | Same issue — named in the doc, never implemented | Added `--shadow-float`/`--shadow-lift` to `@theme` |
+| `Label` font size | Used 14px; spec calls for 12px on form labels specifically | Changed to the `text-label` token |
+| Input/Textarea/Select focus style | Used a glowing focus ring; spec explicitly says focus should just shift the border to Ink, no glow | Swapped the ring for a border-color transition |
+| `Card` had a border + shadow at rest | Spec says static cards get *no* border/shadow — boundary comes from background-color contrast alone | Removed both from the shared `Card` component |
+| Button height was 40px | Below the 44px touch-target minimum | Bumped default button size to 44px |
+| Login card looked like it was floating | Removing `Card`'s border/shadow (above) assumed there's always a neighboring surface for contrast. On the login screen the card is alone on an empty background, so there's nothing to contrast against | Applied the `shadow-lift` token — already defined for "overlaid panel" cases — to just this one card, not the shared component. Every other card in the app stays flat as intended. |
+| `CardTitle` had a hardcoded 24px default | It happened to get overridden correctly, but only by accident of CSS rule ordering, not by anything guaranteed | Removed the hardcoded size; callers now set their own |
 
-### Modified files
-- `main.py` — FastAPI app with CORS (`http://localhost:3000`), all 4 routers mounted under `/api`
+## Auth (login/signup page)
 
----
+Current behavior, plainly:
 
-## Supabase — Manual Steps Required
+- **Sign in** with email/password → straight to `/dashboard`.
+- **Sign up** with a new email → Supabase sends a confirmation email; the page shows "check your email" instead of pretending you're logged in. Clicking the email link *is* the sign-in step (Supabase redirects back with a token the client picks up automatically) — that part is standard Supabase behavior, not something we built.
+- **Sign up** with an email that's already registered → shown "this email is already registered, try signing in" (Supabase itself stays silent about this to prevent account enumeration; we detect it client-side via `data.user.identities.length === 0`, which is Supabase's documented signal for it).
+- **Continue with Google** → Supabase OAuth redirect, lands on `/dashboard`. Needs the Google provider configured in the Supabase dashboard (see Manual steps).
+- Password field has an eye icon to toggle visibility.
+- Visiting `/login` while already signed in redirects straight to `/dashboard` instead of showing the form again (this was a real gap — `/login` sat outside `ProtectedRoute` with no guard of its own, and since Supabase persists sessions in `localStorage`, an old session made the page still fully usable).
 
-### 1. Run in Supabase dashboard → SQL editor
+One accessibility/contrast note worth keeping in mind for future info/status messages: the amber design token (`coaching-amber`) looks good as an accent/badge color but fails text-contrast requirements at small sizes (~2.5:1, needs 4.5:1) — use `text-muted` for any info-style text instead.
 
+## Manual steps still required (not code — you have to do these in the dashboards)
+
+**1. Supabase SQL editor** — run once to create the schema:
 ```sql
 -- profiles table
 create table public.profiles (
@@ -110,29 +111,26 @@ create policy "own rows" on public.sessions
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 ```
 
-### 2. Create Storage bucket
+**2. Supabase Storage** — create a private bucket named `recordings`.
 
-In Supabase → Storage: create a private bucket named `recordings`.
+**3. Google OAuth provider** — Supabase Dashboard → Authentication → Providers → Google. Needs a Google Cloud OAuth client ID/secret, and the Supabase callback URL registered in Google Cloud Console's authorized redirect URIs. The "Continue with Google" button won't work until this is filled in.
 
-### 3. Fill in env files
+**4. Env files**
 
 `client/.env.local`:
 ```
-PUBLIC_SUPABASE_URL=<from Supabase dashboard → Settings → API → Project URL>
-PUBLIC_SUPABASE_ANON_KEY=<from Supabase dashboard → Settings → API → anon key>
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 `server/.env`:
 ```
-SUPABASE_URL=<same project URL>
-SUPABASE_SERVICE_ROLE_KEY=<from Supabase dashboard → Settings → API → service_role key>
-SUPABASE_JWT_SECRET=<from Supabase dashboard → Settings → API → JWT secret>
-OPENROUTER_API_KEY=<from openrouter.ai>
-OPENROUTER_PRIMARY_MODEL=anthropic/claude-sonnet-4-5
-OPENROUTER_FALLBACK_MODEL=openai/gpt-4o-mini
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENROUTER_API_KEY=
+OPENROUTER_PRIMARY_MODEL=openai/gpt-oss-120b:free
+OPENROUTER_FALLBACK_MODEL=google/gemma-4-31b-it:free
 ```
-
----
 
 ## Verification
 
@@ -143,11 +141,8 @@ cd client && npm run build
 # Backend — should print 8
 cd server && uv run python -c "from main import app; print(len(app.routes))"
 
-# Start frontend (localhost:3000)
-cd client && npm run dev
-
-# Start backend (localhost:8000, docs at /docs)
-cd server && uv run fastapi dev main.py
+cd client && npm run dev   # localhost:3000
+cd server && uv run fastapi dev main.py   # localhost:8000, docs at /docs
 ```
 
-After env files are filled: frontend redirects unauthenticated users to `/login`; backend shows 4 stub routers at `localhost:8000/docs`.
+Still outstanding (needs a human, not just a build check): full manual click-through of the auth flows above in a real browser — sign up, confirm, duplicate email, Google, sign out, revisiting `/login` while logged in.

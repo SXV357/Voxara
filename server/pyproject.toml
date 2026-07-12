@@ -1,5 +1,5 @@
 [project]
-name = "Voxara API"
+name = "voxara-api"
 version = "0.1.0"
 description = "Voxara API enabling auth and session recording/management across voice acting + theatre"
 requires-python = ">=3.13"
