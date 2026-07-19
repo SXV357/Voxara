@@ -3,7 +3,13 @@
 ## Project Docs
 
 - `PLAN.md` — ongoing implementation plan. Read before starting any non-trivial feature; it tracks architecture decisions, phase breakdown, and global constraints. Based on `PRD.md`
+- `PRODUCT.md` — referenced by `/impeccable` commands.
 - `DESIGN.md` — design system source of truth. All color tokens, typography, spacing, elevation, and component specs live here.
+- `CHANGES.md` — changelog, organized by topic/area (not by session or date). After any non-trivial change, add or update the relevant topic section with:
+  - **What** — brief, plain description of the change
+  - **Why** — the problem or need driving it
+  - **Method chosen vs. alternatives** — why this approach over the other options considered
+  Keep entries concise — a few lines, not a full writeup. Quirks/gotchas discovered along the way (framework behavior, SDK surprises, platform defaults) belong in a terse, append-only "quirks" list under the relevant topic, separate from the change entries themselves.
 
 ## Frontend
 
@@ -34,9 +40,12 @@ All frontend code lives in `client/`. Commands run from `client/`.
 
 ## Backend
 
-FastAPI server not yet set up. Update this section once the server is scaffolded.
+All backend code lives in `server/`, managed with `uv` (not pip/poetry). Commands run from `server/`.
 
-<!-- placeholder: add start command, port, and any relevant env var notes here -->
+- Running the server (port 8000):
+  - `uv run python main.py` — direct invocation
+  - `uv run fastapi dev main.py` — uvicorn CLI, if preferred
+- Env vars come from `server/.env` (Supabase URL/service-role key, OpenRouter keys — see `config.py`).
 
 ## Behavioral Guidelines
 

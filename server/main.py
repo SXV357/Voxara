@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import onboarding, scenarios, sessions, profile
+from routers import auth, onboarding, scenarios, sessions, profile
 import uvicorn
 
 '''
@@ -27,6 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api")
 app.include_router(onboarding.router, prefix="/api")
 app.include_router(scenarios.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")

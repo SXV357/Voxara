@@ -33,7 +33,7 @@
 
 ---
 
-## Phase 1A: Setup & Scaffolding
+## Phase 1A: Setup & Scaffolding — ✅ complete
 
 > Goal: app shell running in browser with design system applied, auth working, all routes stubbed. No business logic yet.
 
@@ -53,24 +53,24 @@ Three tables to create:
 > **Why a Supabase trigger for auto-inserting the profile row:** If the app handles profile insertion after signup, any failure (network drop, edge case) leaves a user with no profile row, breaking all downstream queries. A DB trigger runs inside Supabase and is guaranteed.
 
 **Steps:**
-- [ ] Install frontend deps: `react-router-dom`, `@supabase/supabase-js`, `lucide-react`, `tailwindcss`, `@tailwindcss/postcss`
-- [ ] Run `npx shadcn@latest init` (Style: Default, Base color: Slate, CSS variables: Yes). Then add components: `button input label card select textarea checkbox badge separator tabs progress`
-- [ ] Configure rsbuild: Tailwind PostCSS, `@` alias pointing to `src/`, dev proxy from `/api` → `http://localhost:8000`
-- [ ] Add TypeScript path alias `@/*` → `./src/*`
-- [ ] Create Supabase browser client reading from `process.env.PUBLIC_SUPABASE_URL` and `process.env.PUBLIC_SUPABASE_ANON_KEY`; populate `.env.local` with values from Supabase dashboard > Settings > API
-- [ ] Install backend deps via uv: `pydantic-settings supabase python-jose[cryptography] python-multipart httpx faster-whisper librosa soundfile`
-- [ ] Create pydantic Settings class reading from `.env`: `supabase_url`, `supabase_service_role_key`, `supabase_jwt_secret`, `openrouter_api_key`, `openrouter_primary_model`, `openrouter_fallback_model`
-- [ ] Create Supabase service-role client
-- [ ] Create `get_current_user` auth dependency that decodes Supabase JWT from `Authorization: Bearer` header using `python-jose`; raises 401 on failure
-- [ ] Define core Pydantic models: `VoiceActingProfile` (subtypes: list[str], experience_level: str, goals: str), `FeedbackDimension` (dimension, score 1–5, rationale), `GrowthArea` (issue, where, suggestion), `Feedback` (summary, dimensions[], strengths[], growth_areas[], pronunciation_notes?)
-- [ ] Create stub routers for onboarding, scenarios, sessions, profile — each returning `{"status": "stub"}`
-- [ ] Wire up FastAPI app: CORS (allow `http://localhost:3000`), include all 4 routers under `/api/*`
-- [ ] Create `AuthContext` providing `session`, `user`, `loading` via `supabase.auth.onAuthStateChange`
-- [ ] Create `ProtectedRoute` component: shows loading state, redirects to `/login` if no session, renders `<Outlet />` if authenticated
-- [ ] Wire up router + routes: `/login`, and under `ProtectedRoute`: `/dashboard`, `/onboarding/voice-acting`, `/voice-acting/scenarios`, `/voice-acting/record/:scenarioId`, `/sessions/:sessionId/feedback`, `/profile`; catch-all redirects to `/dashboard`
-- [ ] Create stub pages for all routes (will be filled in subsequent tasks)
-- [ ] Verify: both servers start — frontend redirects to `/login`, backend shows 4 endpoints at `/docs`
-- [ ] Commit: `feat: project scaffolding — tailwind, shadcn, react-router, fastapi, supabase, auth middleware`
+- [x] Install frontend deps: `react-router-dom`, `@supabase/supabase-js`, `lucide-react`, `tailwindcss`, `@tailwindcss/postcss`
+- [x] Run `npx shadcn@latest init` (Style: Default, Base color: Slate, CSS variables: Yes). Then add components: `button input label card select textarea checkbox badge separator tabs progress`
+- [x] Configure rsbuild: Tailwind PostCSS, `@` alias pointing to `src/`, dev proxy from `/api` → `http://localhost:8000`
+- [x] Add TypeScript path alias `@/*` → `./src/*`
+- [x] Create Supabase browser client reading from `process.env.PUBLIC_SUPABASE_URL` and `process.env.PUBLIC_SUPABASE_ANON_KEY`; populate `.env.local` with values from Supabase dashboard > Settings > API
+- [x] Install backend deps via uv: `pydantic-settings supabase python-jose[cryptography] python-multipart httpx faster-whisper librosa soundfile`
+- [x] Create pydantic Settings class reading from `.env`: `supabase_url`, `supabase_service_role_key`, `supabase_jwt_secret`, `openrouter_api_key`, `openrouter_primary_model`, `openrouter_fallback_model`
+- [x] Create Supabase service-role client
+- [x] Create `get_current_user` auth dependency that decodes Supabase JWT from `Authorization: Bearer` header using `python-jose`; raises 401 on failure
+- [x] Define core Pydantic models: `VoiceActingProfile` (subtypes: list[str], experience_level: str, goals: str), `FeedbackDimension` (dimension, score 1–5, rationale), `GrowthArea` (issue, where, suggestion), `Feedback` (summary, dimensions[], strengths[], growth_areas[], pronunciation_notes?)
+- [x] Create stub routers for onboarding, scenarios, sessions, profile — each returning `{"status": "stub"}`
+- [x] Wire up FastAPI app: CORS (allow `http://localhost:3000`), include all 4 routers under `/api/*`
+- [x] Create `AuthContext` providing `session`, `user`, `loading` via `supabase.auth.onAuthStateChange`
+- [x] Create `ProtectedRoute` component: shows loading state, redirects to `/login` if no session, renders `<Outlet />` if authenticated
+- [x] Wire up router + routes: `/login`, and under `ProtectedRoute`: `/dashboard`, `/onboarding/voice-acting`, `/voice-acting/scenarios`, `/voice-acting/record/:scenarioId`, `/sessions/:sessionId/feedback`, `/profile`; catch-all redirects to `/dashboard`
+- [x] Create stub pages for all routes (will be filled in subsequent tasks)
+- [x] Verify: both servers start — frontend redirects to `/login`, backend shows 4 endpoints at `/docs`
+- [x] Commit: `feat: project scaffolding — tailwind, shadcn, react-router, fastapi, supabase, auth middleware`
 
 ---
 
@@ -81,23 +81,23 @@ Three tables to create:
 - Produces: `DashboardLayout` wrapper used by every authenticated page
 
 **Steps:**
-- [ ] Build `LoginPage`: email/password form with toggle between "Sign in" / "Sign up" mode. On success navigate to `/dashboard`. Show inline error on failure.
-- [ ] Build `Sidebar`: left-side nav with "Voice Acting" as a `NavLink` to `/voice-acting/scenarios`, "Theatre" as a non-clickable grayed div, and bottom section with Profile link + Sign out button.
-- [ ] Build `DashboardLayout`: flex row with `Sidebar` on the left, scrollable `main` on the right. Wraps all authenticated pages.
-- [ ] Update all stub pages to use `DashboardLayout`.
-- [ ] Manual test: unauthenticated → redirects to `/login`; sign up → lands on `/dashboard` with sidebar; Theatre entry is unclickable; sign out → `/login`; sign in → `/dashboard`
-- [ ] Commit: `feat: auth flow — login/signup, sidebar layout, protected routes`
+- [x] Build `LoginPage`: email/password form with toggle between "Sign in" / "Sign up" mode. On success navigate to `/dashboard`. Show inline error on failure.
+- [x] Build `Sidebar`: left-side nav with "Voice Acting" as a `NavLink` to `/voice-acting/scenarios`, "Theatre" as a non-clickable grayed div, and bottom section with Profile link + Sign out button.
+- [x] Build `DashboardLayout`: flex row with `Sidebar` on the left, scrollable `main` on the right. Wraps all authenticated pages.
+- [x] Update all stub pages to use `DashboardLayout`.
+- [x] Manual test: unauthenticated → redirects to `/login`; sign up → lands on `/dashboard` with sidebar; Theatre entry is unclickable; sign out → `/login`; sign in → `/dashboard`
+- [x] Commit: `feat: auth flow — login/signup, sidebar layout, protected routes`
 
 ---
 
 ## Phase 1A → 1B Checkpoint
 
 Before proceeding to business logic, verify:
-- [ ] Both servers start cleanly
-- [ ] Design system tokens render correctly in the browser (check `/#design-preview`)
-- [ ] Auth works end-to-end (sign up, sign in, sign out, protected route redirect)
-- [ ] All stub pages reachable and using `DashboardLayout`
-- [ ] Theatre sidebar entry is visible but unclickable
+- [x] Both servers start cleanly
+- [x] Design system tokens render correctly in the browser (check `/#design-preview`)
+- [x] Auth works end-to-end (sign up, sign in, sign out, protected route redirect)
+- [x] All stub pages reachable and using `DashboardLayout`
+- [x] Theatre sidebar entry is visible but unclickable
 
 This is the design iteration point. If the shell layout, typography, spacing, or component feel needs work, iterate here — with or without `/impeccable` — before any business logic is built on top of it. Changes to layout structure are cheap now, expensive later.
 

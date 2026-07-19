@@ -17,6 +17,28 @@ function getErrorMessage(error: unknown): string {
   return 'Something went wrong. Try again.';
 }
 
+async function getGoogleOnlyErrorMessage(
+  email: string,
+  fallback: string,
+): Promise<string> {
+  try {
+    const res = await fetch('/api/auth/check-provider', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return fallback;
+
+    const { providers } = (await res.json()) as { providers: string[] };
+    if (providers.includes('google') && !providers.includes('email')) {
+      return 'This account uses Google. Sign in with Google below.';
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
@@ -66,7 +88,9 @@ export function LoginPage() {
       setSubmitting(false);
 
       if (authError) {
-        setError(getErrorMessage(authError));
+        setError(
+          await getGoogleOnlyErrorMessage(email, getErrorMessage(authError)),
+        );
         return;
       }
 
