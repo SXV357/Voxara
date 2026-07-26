@@ -148,16 +148,18 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
-      <Card className="w-full max-w-sm shadow-lift">
-        <CardHeader>
-          <CardTitle className="text-display font-semibold text-ink">
+      <Card className="w-full max-w-md shadow-lift">
+        <CardHeader className="p-8 pb-2">
+          <CardTitle className="text-4xl font-semibold text-ink">
             {mode === 'sign-in' ? 'Sign in' : 'Create an account'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <CardContent className="p-8 pt-2">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -165,10 +167,13 @@ export function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="h-12 text-base"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -180,7 +185,7 @@ export function LoginPage() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
+                  className="h-12 pr-11 text-base"
                 />
                 <button
                   type="button"
@@ -189,26 +194,26 @@ export function LoginPage() {
                   className="absolute inset-y-0 right-0 flex items-center px-3 text-muted transition-colors hover:text-ink"
                 >
                   {showPassword ? (
-                    <EyeOff className="size-4" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="size-4" />
+                    <Eye className="size-5" />
                   )}
                 </button>
               </div>
             </div>
 
             {error && (
-              <p role="alert" className="text-body text-studio-crimson">
+              <p role="alert" className="text-base text-studio-crimson">
                 {error}
               </p>
             )}
             {info && (
-              <p role="status" className="text-body text-muted">
+              <p role="status" className="text-base text-muted">
                 {info}
               </p>
             )}
 
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting} size="lg">
               {submitting
                 ? 'Please wait…'
                 : mode === 'sign-in'
@@ -217,15 +222,16 @@ export function LoginPage() {
             </Button>
           </form>
 
-          <div className="my-4 flex items-center gap-3">
+          <div className="my-5 flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="text-body text-muted">or</span>
+            <span className="text-base text-muted">or</span>
             <Separator className="flex-1" />
           </div>
 
           <Button
             type="button"
             variant="outline"
+            size="lg"
             className="w-full"
             disabled={submitting}
             onClick={handleGoogleSignIn}
@@ -242,7 +248,7 @@ export function LoginPage() {
               setInfo(null);
               setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
             }}
-            className="mt-4 h-auto w-fit p-0 text-body text-muted hover:bg-transparent hover:text-ink"
+            className="mt-5 h-auto w-fit p-0 text-base text-muted hover:bg-transparent hover:text-ink"
           >
             {mode === 'sign-in'
               ? "Don't have an account? Sign up"

@@ -11,7 +11,7 @@ Organized by area, not by session. Each item explains what changed and why, in p
 - `src/contexts/AuthContext.tsx` — `useAuth()` hook exposing `session`/`user`/`loading`, tracked via Supabase's `onAuthStateChange`.
 - `src/components/ProtectedRoute.tsx` — redirects to `/login` if there's no session; wraps every authenticated page.
 - `src/components/DashboardLayout.tsx` + `src/components/Sidebar.tsx` — the shell (sidebar + scrollable content) for every authenticated page. Applied once as a parent route in `App.tsx` rather than imported into each page individually — one place to change the shell later, and the six page files stay untouched.
-- `src/pages/` — `LoginPage` (built out, see Auth below); `DashboardPage`, `OnboardingVoiceActingPage`, `ScenarioSelectionPage`, `RecordingPage`, `FeedbackPage`, `ProfilePage` (still stubs).
+- `src/pages/` — `LoginPage` (built out, see Auth below); `OnboardingVoiceActingPage` and `ScenarioSelectionPage` (built out, see Voice Acting Onboarding below); `DashboardPage`, `RecordingPage`, `FeedbackPage`, `ProfilePage` (still stubs).
 - `src/components/ui/` — shadcn primitives (`button`, `input`, `label`, `card`, `select`, `textarea`, `checkbox`, `badge`, `separator`, `tabs`, `progress`).
 
 ## Backend scaffolding (`server/`)
@@ -22,7 +22,7 @@ Organized by area, not by session. Each item explains what changed and why, in p
 - `database.py` — Supabase service-role client (server-side, full access — never expose this key to the frontend).
 - `auth.py` — `get_current_user` dependency. Verifies the JWT Supabase issues against its public key set (ES256), rather than a shared secret — this is why it calls `/.well-known/jwks.json` instead of just checking a password-like secret. The key set is cached (`@lru_cache`) since it only changes on key rotation, not per-request.
 - `models.py` — Pydantic models for the feedback/profile data shapes the app will produce later.
-- `routers/*.py` — five routers: `onboarding`, `scenarios`, `sessions`, `profile` (still stub endpoints returning `{"status": "stub"}`), and `auth` (real — `POST /auth/check-provider`, see Auth section below).
+- `routers/*.py` — five routers: `scenarios`, `sessions`, `profile` (still stub endpoints returning `{"status": "stub"}`); `onboarding` (real — `POST /onboarding/voice-acting`, see Voice Acting Onboarding section below); and `auth` (real — `POST /auth/check-provider`, see Auth section below).
 - `main.py` — mounts the routers under `/api`, CORS allowed for `localhost:3000`.
 
 ## Design system fixes
@@ -39,6 +39,7 @@ A few gaps between `DESIGN.md` (the spec) and the actual components, found and f
 | Button height was 40px | Below the 44px touch-target minimum | Bumped default button size to 44px |
 | Login card looked like it was floating | Removing `Card`'s border/shadow (above) assumed there's always a neighboring surface for contrast. On the login screen the card is alone on an empty background, so there's nothing to contrast against | Applied the `shadow-lift` token — already defined for "overlaid panel" cases — to just this one card, not the shared component. Every other card in the app stays flat as intended. |
 | `CardTitle` had a hardcoded 24px default | It happened to get overridden correctly, but only by accident of CSS rule ordering, not by anything guaranteed | Removed the hardcoded size; callers now set their own |
+| shadcn compat tokens (`bg-popover`, `bg-primary`, `bg-card`, `bg-accent`, `text-*-foreground`, etc.) silently didn't apply anywhere in the app | Tailwind v4 only turns a `@theme` variable into a utility class if it's under a recognized namespace (`--color-*`, `--text-*`, `--radius-*`, ...). The shadcn variable block was copied in with bare names (`--background`, `--primary`, `--popover`, ...) — valid CSS custom properties, but invisible to Tailwind's utility generator. Every component leaning on the default shadcn color classes (Button's `bg-primary`, Select's `bg-popover`/`bg-accent`, Card's `bg-card`) rendered with no color at all. Caught when the Select dropdown on the onboarding page rendered fully transparent (dropdown text overlapping page content) and the Continue button rendered as bare unstyled text | Added `--color-*` aliases (`--color-background: var(--background)`, etc.) for `background/foreground/card/popover/primary/secondary/accent/destructive` and their `-foreground` pairs. Left bare `--muted` unaliased — it collides with the existing bespoke `--color-muted` (different value, already used as `text-muted`) — so `bg-muted` (only used by `SelectSeparator`, not currently in use) stays a no-op |
 
 ## Auth (login/signup page)
 
@@ -80,6 +81,18 @@ One accessibility/contrast note worth keeping in mind for future info/status mes
 **Why not fixed:** MVP stage, low priority relative to current build effort; this is stock Supabase Auth behavior (not something `auth.py` controls), and exploiting it requires knowing the victim's email in advance and winning a race against their first login — not a trivial drive-by attack.
 
 **Mitigation if revisited:** notify the user (email) whenever a new identity links to their account; or expire/purge unverified raw email/password signups after a short window so a planted row can't sit dormant waiting to be "rescued" by the victim's own OAuth login.
+
+## Voice Acting Onboarding (Phase 1B, Task 3)
+
+**What:** `POST /api/onboarding/voice-acting` (`server/routers/onboarding.py`) validates the request as `VoiceActingProfile` and writes it to `profiles.voice_acting_profile` for the calling user. `OnboardingVoiceActingPage` collects subtypes (multi-select checkboxes, at least one required), experience level (select), and goals (required freeform textarea), then POSTs to that endpoint and navigates to `/voice-acting/scenarios` on success. `ScenarioSelectionPage` now guards itself: on mount it reads `profiles.voice_acting_profile` for the current user directly via the Supabase browser client and redirects to onboarding if it's null.
+
+**Why:** Onboarding data has to exist before a user can pick a scenario, since it will feed the LLM feedback prompt later. Gating at the scenario page (rather than gating navigation from the sidebar) means a returning user hitting the URL directly is still covered.
+
+**Method chosen vs. alternatives:**
+- The Supabase update in the onboarding route checks `result.data` and 500s if empty, rather than trusting a 200 from `.execute()`. This route runs under the service-role key (bypasses RLS — see `database.py`'s note on that tradeoff), so the `.eq("id", user_id)` filter is a manually-enforced safety boundary, not a redundant one; a silent zero-row update would look like success while writing nothing.
+- The onboarding-guard on `ScenarioSelectionPage` reads Supabase directly from the browser client instead of adding real logic to the existing `GET /api/profile/` stub. That stub is reserved for Task 8's full profile page; building it out now for this narrower read would mean Task 8 either duplicates it or works around it. A direct client read is also safe here without extra app-level filtering — RLS on `profiles` already restricts reads to the caller's own row.
+- This is the first authenticated `fetch()` call in the frontend (previously only `check-provider` existed, and that's unauthenticated) — the `Authorization: Bearer ${session.access_token}` header is attached inline in the submit handler rather than behind a new fetch-wrapper abstraction, since there's only the one call site.
+- The redirect guard is a plain in-page `loading`/`needs-onboarding`/`ready` status, not a new reusable hook — `ProtectedRoute` only guards on synchronous session presence, and this async/data-dependent case doesn't yet have another consumer to justify extracting a shared pattern.
 
 ## Verification
 
