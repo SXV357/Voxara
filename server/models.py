@@ -7,6 +7,17 @@ class VoiceActingProfile(BaseModel):
     goals: str
 
 
+class ScenarioSummary(BaseModel):
+    id: str
+    title: str
+    context: str
+    dimensions: list[str]
+
+
+class Scenario(ScenarioSummary):
+    script: str
+
+
 class FeedbackDimension(BaseModel):
     dimension: str
     score: int  # 1-5

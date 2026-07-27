@@ -47,6 +47,11 @@ All backend code lives in `server/`, managed with `uv` (not pip/poetry). Command
   - `uv run fastapi dev main.py` — uvicorn CLI, if preferred
 - Env vars come from `server/.env` (Supabase URL/service-role key, OpenRouter keys — see `config.py`).
 
+### Gotchas
+
+- Auth verifies JWTs against Supabase's JWKS (ES256), cached forever per process — a signing-key rotation needs a backend restart.
+- `seed_scenarios()` reseeds scenarios on every `lifespan` boot, not a one-time script.
+
 ## Behavioral Guidelines
 
 ### 1. Think Before Coding

@@ -66,6 +66,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
   const [mode, setMode] = useState<Mode>('sign-in');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -101,6 +102,7 @@ export function LoginPage() {
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: { data: { full_name: name } },
     });
 
     setSubmitting(false);
@@ -156,6 +158,22 @@ export function LoginPage() {
         </CardHeader>
         <CardContent className="p-8 pt-2">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {mode === 'sign-up' && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name" className="text-sm">
+                  Full name
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12 text-base"
+                />
+              </div>
+            )}
             <div className="flex flex-col gap-2">
               <Label htmlFor="email" className="text-sm">
                 Email

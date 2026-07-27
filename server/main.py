@@ -1,6 +1,9 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, onboarding, scenarios, sessions, profile
+from seed import seed_scenarios
 import uvicorn
 
 '''
@@ -16,7 +19,13 @@ should do and which it of course does at the time is verifying extracted JWT tok
 situations where the token can just be forged and someone breaking into the application
 '''
 
-app = FastAPI(title="Voxara API")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    seed_scenarios()
+    yield
+
+
+app = FastAPI(title="Voxara API", lifespan=lifespan)
 
 # revisit when deploying
 app.add_middleware(
@@ -26,6 +35,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(onboarding.router, prefix="/api")

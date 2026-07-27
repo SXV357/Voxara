@@ -1,10 +1,13 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Mic, Drama, User, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { cn } from '@/lib/utils';
+import { cn, getDisplayName } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const displayName = getDisplayName(user) ?? user?.email?.split('@')[0];
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -21,7 +24,7 @@ export function Sidebar() {
               'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink transition-colors',
               isActive
                 ? 'border-l-[3px] border-studio-crimson bg-studio-warm font-semibold'
-                : 'border-l-[3px] border-transparent hover:bg-studio-warm'
+                : 'border-l-[3px] border-transparent hover:bg-studio-warm',
             )
           }
         >
@@ -39,6 +42,11 @@ export function Sidebar() {
       </nav>
 
       <div className="flex flex-col gap-1">
+        {displayName && (
+          <p className="truncate px-3 pb-1 text-sm font-medium text-muted">
+            Hi, {displayName}
+          </p>
+        )}
         <NavLink
           to="/profile"
           className={({ isActive }) =>
@@ -46,7 +54,7 @@ export function Sidebar() {
               'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink transition-colors',
               isActive
                 ? 'border-l-[3px] border-studio-crimson bg-studio-warm font-semibold'
-                : 'border-l-[3px] border-transparent hover:bg-studio-warm'
+                : 'border-l-[3px] border-transparent hover:bg-studio-warm',
             )
           }
         >
@@ -57,7 +65,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={handleSignOut}
-          className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-ink transition-colors hover:bg-studio-warm"
+          className="flex items-center gap-2 rounded-md border-l-[3px] border-transparent px-3 py-2 text-left text-sm font-medium text-ink transition-colors hover:bg-studio-warm"
         >
           <LogOut className="size-4" />
           Sign out

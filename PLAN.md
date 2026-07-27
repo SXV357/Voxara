@@ -114,11 +114,11 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 - Guard logic: on entering `/voice-acting/scenarios`, fetch `profiles.voice_acting_profile` for the current user. If null → redirect to `/onboarding/voice-acting`. If exists → proceed.
 
 **Steps:**
-- [ ] Implement `POST /api/onboarding/voice-acting`: validates body as `VoiceActingProfile`, updates `profiles.voice_acting_profile` in Supabase for the current user.
-- [ ] Build `OnboardingVoiceActingPage`: form with three fields — subtypes (multi-select checkboxes: Commercial / Audiobook / Character & Animation / Narration; at least one required), experience level (Select: Just starting out / Some experience / Intermediate), goals (freeform textarea: user describes what they're working on in their own words; required). On submit, POST to backend; on success navigate to `/voice-acting/scenarios`.
-- [ ] Add onboarding guard to `ScenarioSelectionPage`: on mount, fetch profile and redirect to `/onboarding/voice-acting` if `voice_acting_profile` is null.
-- [ ] Manual test: new user → clicking "Voice Acting" redirects to onboarding; fill form → submit → lands on scenarios (blank); Supabase profiles table shows populated `voice_acting_profile`; refresh scenarios page → no redirect
-- [ ] Commit: `feat: voice acting onboarding flow`
+- [x] Implement `POST /api/onboarding/voice-acting`: validates body as `VoiceActingProfile`, updates `profiles.voice_acting_profile` in Supabase for the current user.
+- [x] Build `OnboardingVoiceActingPage`: form with three fields — subtypes (multi-select checkboxes: Commercial / Audiobook / Character & Animation / Narration; at least one required), experience level (Select: Just starting out / Some experience / Intermediate), goals (freeform textarea: user describes what they're working on in their own words; required). On submit, POST to backend; on success navigate to `/voice-acting/scenarios`.
+- [x] Add onboarding guard to `ScenarioSelectionPage`: on mount, fetch profile and redirect to `/onboarding/voice-acting` if `voice_acting_profile` is null.
+- [x] Manual test: new user → clicking "Voice Acting" redirects to onboarding; fill form → submit → lands on scenarios (blank); Supabase profiles table shows populated `voice_acting_profile`; refresh scenarios page → no redirect
+- [x] Commit: `feat: voice acting onboarding flow`
 
 ---
 
@@ -140,12 +140,12 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 > **Why a seed script instead of a migration:** Scenarios are content, not schema. A script is easier to re-run and modify as scenario scripts and dimensions are refined before launch. Baking content into a migration makes it harder to update later.
 
 **Steps:**
-- [ ] Implement `GET /api/scenarios/voice-acting` and `GET /api/scenarios/{id}` endpoints — both require auth.
-- [ ] Write seed script — clears existing voice_acting scenarios then inserts the 4 above. Run with `uv run python scripts/seed_scenarios.py`. Expected: "Seeded 4 scenarios."
-- [ ] Build `ScenarioCard` component: shows title, truncated context description, dimension badges, and a "Select" button.
-- [ ] Complete `ScenarioSelectionPage`: fetches scenarios from API, renders a responsive grid of `ScenarioCard`s. Selecting a card navigates to `/voice-acting/record/:scenarioId`.
-- [ ] Manual test: 4 cards visible with correct titles and dimension badges; clicking "Select" navigates to recording page URL
-- [ ] Commit: `feat: curated scenario library — 4 scenarios seeded, selection UI`
+- [x] Implement `GET /api/scenarios/voice-acting` and `GET /api/scenarios/{id}` endpoints — both require auth.
+- [x] Write `seed_scenarios()` in `server/seed.py` — clears existing voice_acting scenarios then inserts the 4 above. Run automatically on app startup via FastAPI `lifespan` (not a manually-run script — one less step to remember). Expected on startup: "Seeded 4 scenarios."
+- [x] Build `ScenarioCard` component: shows title, truncated context description, dimension badges, and a "Select" button.
+- [x] Complete `ScenarioSelectionPage`: fetches scenarios from API, renders a responsive grid of `ScenarioCard`s. Selecting a card navigates to `/voice-acting/record/:scenarioId`.
+- [x] Manual test: 4 cards visible with correct titles and dimension badges; clicking "Select" navigates to recording page URL
+- [x] Commit: `feat: curated scenario library — 4 scenarios seeded, selection UI`
 
 ---
 
@@ -241,15 +241,17 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 
 ### Task 8: Session History Dashboard + Profile Page
 
+> Profile Page portion pulled forward and completed ahead of schedule (before Task 5-7's sessions pipeline existed) — see below. Session History Dashboard remains, since it depends on `GET /api/sessions/` from Task 6.
+
 **Interfaces:**
 - `GET /api/sessions/` — already implemented in Task 6
 - `GET /api/profile/` → full profile row
 - `PATCH /api/profile/voice-acting` → updates `voice_acting_profile`
 
 **Steps:**
-- [ ] Implement `GET /api/profile/` and `PATCH /api/profile/voice-acting` endpoints.
+- [x] Implement `GET /api/profile/` and `PATCH /api/profile/voice-acting` endpoints.
 - [ ] Build `DashboardPage`: heading + "New Session" button. Fetches session list on mount. Renders clickable cards showing scenario title, feedback summary preview (line-clamp), and date. Clicking navigates to `/sessions/:id/feedback`. Empty state message if no sessions.
-- [ ] Build `ProfilePage`: shows user email. Form pre-populated from `GET /api/profile/` with same fields as onboarding — subtypes (multi-select checkboxes, same options), experience level (same select), goals (freeform textarea pre-populated with saved value). On save, PATCHes `/api/profile/voice-acting`. Shows "Saved!" confirmation for 2 seconds.
+- [x] Build `ProfilePage`: shows user email (and name, if captured at signup). Form pre-populated from `GET /api/profile/` with same fields as onboarding — subtypes (multi-select checkboxes, same options), experience level (same select), goals (freeform textarea pre-populated with saved value). On save, PATCHes `/api/profile/voice-acting`. Shows "Saved!" confirmation for 2 seconds. Theatre profile editing deferred — no theatre onboarding flow exists yet to have populated it, and Theatre stays out of scope until voice acting E2E is validated (per Global Constraints).
 - [ ] Manual test: complete 2 sessions → dashboard shows both clickable cards; click → correct feedback page; profile shows current onboarding data; edit + save → changes persist; do another session → feedback framing reflects updated profile
 - [ ] Commit: `feat: session history dashboard + profile page with editable voice acting settings`
 

@@ -105,7 +105,7 @@ Those that are involved in this space currently don't have a means of effectivel
 | Breath Support & Consistency | Partially | Audio analysis (phrase-end drop-off) |
 | Filler Words & Flow | Yes | Transcript |
 | Character / Tonal Differentiation | No | LLM inference |
-| Subtlety & Mic Awareness | No | LLM inference from prosody + transcript |
+| ~~Subtlety & Mic Awareness~~ | ~~Out of scope - Non measurable~~ | - |
 
 ### Theatre
 | Dimension | Measurable? | Method |

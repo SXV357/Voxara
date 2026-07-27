@@ -94,6 +94,27 @@ One accessibility/contrast note worth keeping in mind for future info/status mes
 - This is the first authenticated `fetch()` call in the frontend (previously only `check-provider` existed, and that's unauthenticated) — the `Authorization: Bearer ${session.access_token}` header is attached inline in the submit handler rather than behind a new fetch-wrapper abstraction, since there's only the one call site.
 - The redirect guard is a plain in-page `loading`/`needs-onboarding`/`ready` status, not a new reusable hook — `ProtectedRoute` only guards on synchronous session presence, and this async/data-dependent case doesn't yet have another consumer to justify extracting a shared pattern.
 
+## Scenario Library (Phase 1B, Task 4)
+
+**What:** `GET /api/scenarios/voice-acting` (`server/routers/scenarios.py`) returns the 4 curated scenario summaries (id, title, context, dimensions); `GET /api/scenarios/{id}` returns the full scenario including the script. `server/seed.py`'s `seed_scenarios()` clears existing `mode="voice_acting"` rows and re-inserts the 4 scenarios (Villain Monologue, Fast Food Commercial, Multi-Character Audiobook Dialogue, Nature Documentary Narration), and runs automatically via a FastAPI `lifespan` handler in `main.py` on every app startup. `ScenarioCard` renders title, truncated context, dimension badges, and a Select button; `ScenarioSelectionPage` fetches the list and renders a responsive grid, navigating to `/voice-acting/record/:scenarioId` on select.
+
+**Why:** Scenario content needs to exist before the selection UI has anything to render, and it needs to be trivially re-runnable as scripts/dimensions get tuned pre-launch.
+
+**Method chosen vs. alternatives:**
+- Seeding runs on app startup (`lifespan`) instead of a manually-invoked `scripts/seed_scenarios.py`. A manual step is easy to forget after editing scenario copy; startup seeding guarantees the DB always matches the code without a separate command to remember. Tradeoff: every reload during local dev re-runs a delete+insert against Supabase — negligible cost at 4 rows, would need reconsidering if scenario count or seed cost grows.
+- `GET /{scenario_id}` avoids `.single()` and instead checks `if not result.data` (same pattern as the onboarding route's update check) — `.single()` raises inside the postgrest client on zero rows, which is a less direct way to produce the 404 than just checking an empty list.
+
+## Profile Page (pulled forward from Task 8)
+
+**What:** `GET /api/profile/` (`server/routers/profile.py`) returns the full `profiles` row for the current user; `PATCH /api/profile/voice-acting` updates `voice_acting_profile` (reuses the existing `VoiceActingProfile` model — same shape as onboarding). `ProfilePage` shows the user's email (and name, if set) and an editable form pre-populated from `GET /api/profile/`, with a "Saved!" confirmation on `PATCH` success. `LoginPage`'s sign-up form now collects a "Full name" field; `Sidebar` shows a "Hi, {name}" greeting.
+
+**Why:** Wanted Profile editable ahead of the sessions pipeline (originally bundled at the very end of Phase 1B in Task 8) rather than deferred, plus a name-based greeting somewhere in the app shell.
+
+**Method chosen vs. alternatives:**
+- Name is stored in Supabase Auth's `user_metadata` (via `signUp`'s `options.data.full_name`), not a new column on `profiles`. Google OAuth already populates `user_metadata.full_name`/`name` automatically, so this keeps both signup paths reading from the same place with zero schema change. Users who signed up before this change have no name — `Sidebar`/`ProfilePage` fall back to nothing shown / email only.
+- Theatre profile editing is explicitly **not** built here — there's no Theatre onboarding flow yet to have ever written a `theatre_profile`, and PLAN.md's Global Constraints keep Theatre out of scope until voice acting E2E is validated. Building an edit form for a profile shape that's never created would be scope creep ahead of that gate.
+- `GET /api/profile/` returns the full row (not scoped to just `voice_acting_profile`) since Task 8's original interface spec already defines it that way and `ProfilePage` needs `voice_acting_profile` specifically today — no extra endpoint needed later when other consumers show up.
+
 ## Verification
 
 ```bash
