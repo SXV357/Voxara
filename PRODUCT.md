@@ -45,3 +45,7 @@ The voice of a skilled coach who understands that performance is subjective art.
 ## Accessibility & Inclusion
 
 No formal WCAG level committed yet. Good-faith target: readable contrast, keyboard-navigable flows, reduced-motion support for animations. Avoid motion or visual effects that would block users with vestibular sensitivity. Screen reader–friendly form labels throughout onboarding and feedback screens.
+
+## Platform Support
+
+Desktop-only for the MVP — no responsive/mobile breakpoints anywhere in the app; layouts are built and verified at desktop widths only (existing "responsive grid" language on scenario selection refers to reflowing column count across desktop widths, not phone widths). Mobile support is an explicit future-phase stretch goal, not implicit scope of any current or upcoming task. See `PLAN.md`'s Global Constraints for the corresponding build-time constraint.

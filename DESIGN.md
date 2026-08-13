@@ -213,7 +213,9 @@ Flat-by-default. Depth expressed through tonal layering (Canvas → Studio Surfa
 The visual that matters most in this product. Horizontal row of five small rectangles (5×20px, 4px radius, 4px gap), filled to the score value in Studio Crimson. Unfilled pips in Studio Surface with a 1px warm-light-gray border. Score label in Muted text. Dimension name in Title weight. This pattern should be consistent across every feedback view — no alternative score visualizations.
 
 ### Recording State Indicator
-When the MediaRecorder is active, a 10px circle filled Studio Crimson pulses at 1s intervals (`opacity: 1 → 0.4 → 1`, `ease-in-out`). This is the only animation in the product that runs continuously. All other motion is response to user interaction.
+Idle: a 10px circle in Muted, no animation. When `MediaRecorder` is active, the circle fills Studio Crimson and pulses at 1s intervals (`opacity: 1 → 0.4 → 1`, `ease-in-out`). This is the baseline continuous animation in the product; all other motion is a response to user interaction.
+
+**Named exception — Waveform Carousel.** The one deliberate second continuous animation, scoped tightly: while `MediaRecorder` is actively recording (not idle, not paused, not stopped), a horizontal strip of amplitude bars driven by a live Web Audio `AnalyserNode` scrolls continuously next to the dot, confirming to the performer that the mic is actually capturing sound. It freezes the instant recording is paused and disappears when stopped or idle. This exists only on the recording screen and only during the active-recording state — it does not generalize to "waveforms are now a motif"; don't reach for it elsewhere. Respects `prefers-reduced-motion` (falls back to static "Capturing audio…" text).
 
 ## 6. Do's and Don'ts
 
@@ -239,5 +241,5 @@ When the MediaRecorder is active, a 10px circle filled Studio Crimson pulses at 
 - **Don't** use gradient text (`background-clip: text`). Single solid color only.
 - **Don't** use side-stripe borders (`border-left` > 1px as a colored accent). Rewrite with background tints or no border.
 - **Don't** write vague feedback UI copy. Every piece of text in the feedback screen should be specific: names a moment, quotes a phrase, gives a timestamp. Generic ("good energy") is a design failure here, not just a content failure.
-- **Don't** use motion for decoration. The only continuous animation in the product is the recording pulse. Everything else is a response to user interaction.
+- **Don't** use motion for decoration. Continuous animation is reserved for the recording pulse and its scoped Waveform Carousel exception (see Recording State Indicator) — nothing else runs continuously. Everything else is a response to user interaction.
 - **Don't** build modal-first flows. Onboarding, profile editing, scenario context: inline or separate screens. Modals as a first answer are a design shortcut, not a UX decision.

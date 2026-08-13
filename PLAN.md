@@ -30,6 +30,7 @@
 - Feedback must reference timestamps or quoted transcript phrases — not generic
 - ffmpeg must be installed on the host machine (required by both whisper and librosa for webm)
 - All scenario scripts designed to be spoken in ~60 seconds; actual recording time varies by performer pace and scenario pacing (which is itself a feedback dimension)
+- Desktop-only for MVP — no responsive/mobile breakpoints anywhere in the app. Mobile is an explicit stretch goal for a future phase, not implicitly covered by "responsive grid" language elsewhere in this plan (e.g. `ScenarioSelectionPage`'s grid reflows column count on wide desktop viewports only, not down to phone widths)
 
 ---
 
@@ -162,10 +163,12 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 **`useAudioRecorder` hook states:** `idle` → `recording` → `stopped`. Exposes: `start()`, `stop()`, `reset()`, `audioBlob`, `audioUrl` (object URL for playback).
 
 **Steps:**
-- [ ] Build `useAudioRecorder` hook using `navigator.mediaDevices.getUserMedia` + `MediaRecorder`. On stop, assemble chunks into a `Blob` and create an object URL. `reset()` revokes the URL and clears state.
-- [ ] Build `RecordingPage`: fetches scenario by ID from API; displays scenario title, context, and script. Recording controls: "Start Recording" → "Stop Recording" → shows audio playback + "Submit for Feedback" / "Re-record". On submit, POSTs FormData (`audio` file + `scenario_id`) to `/api/sessions/voice-acting`, then navigates to `/sessions/:session_id/feedback`. Shows a "processing may take 20–40 seconds" note while submitting.
-- [ ] Manual test: scenario content displays correctly; mic permission prompt appears on start; audio player appears after stop; re-record resets; submit will 422 until Task 6 (expected)
+- [x] Build `useAudioRecorder` hook using `navigator.mediaDevices.getUserMedia` + `MediaRecorder`. On stop, assemble chunks into a `Blob` and create an object URL. `reset()` revokes the URL and clears state. Also exposes `pause()`/`resume()` (state adds a `paused` value between `recording` and `stopped`), the live `MediaStream` (for the waveform), and a typed `error` (`permission-denied` / `no-device` / `unsupported` / `unknown`).
+- [x] Build `RecordingPage`: fetches scenario by ID from API; displays scenario title, context, script, dimension badges, and the performer's own `goals` text (read-only, unfiltered — see Task 5 note below). Recording controls: "Start Recording" → "Pause"/"Stop" while live → shows audio playback + "Submit for Feedback" / "Re-record". On submit, POSTs FormData (`audio` file + `scenario_id`) to `/api/sessions/voice-acting`, then navigates to `/sessions/:session_id/feedback`. Shows a "processing may take 20–40 seconds" note while submitting.
+- [x] Manual test: scenario content displays correctly; mic permission prompt appears on start; audio player appears after stop; re-record resets; submit will 422 until Task 6 (expected)
 - [ ] Commit: `feat: in-app audio recording via MediaRecorder API`
+
+> **Why goals display verbatim, unfiltered:** The performer's freeform `goals` text is shown as-is next to the scenario's dimension badges ("Your goal: …") rather than filtered down to whichever parts are "relevant" to this scenario. Judging relevance is a semantic task that needs an LLM call — there's no endpoint for it, and Task 6's feedback pipeline already does this server-side (full profile + scenario passed together into the feedback prompt). Building a client-side relevance heuristic here would either guess or fake it; the honest move is showing the goal text plainly and letting the actual weighting happen invisibly in the backend, where it already belongs.
 
 ---
 

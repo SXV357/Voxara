@@ -10,3 +10,7 @@ export interface ScenarioSummary {
   context: string;
   dimensions: string[];
 }
+
+export interface Scenario extends ScenarioSummary {
+  script: string;
+}

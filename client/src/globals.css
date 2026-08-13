@@ -31,6 +31,8 @@
   --shadow-float: 0 2px 8px oklch(0.15 0.025 27 / 0.08);
   --shadow-lift: 0 4px 16px oklch(0.15 0.025 27 / 0.12);
 
+  --animate-recording-pulse: recording-pulse 1s ease-in-out infinite;
+
   /* shadcn/ui CSS variable mapping */
   --background: oklch(0.980 0.008 72);
   --foreground: oklch(0.15 0.025 27);
@@ -72,6 +74,16 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+}
+
+@keyframes recording-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @layer base {

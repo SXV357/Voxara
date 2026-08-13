@@ -1,18 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { humanizeDimension } from '@/lib/utils';
 import type { ScenarioSummary } from '@/types';
 
 interface ScenarioCardProps {
   scenario: ScenarioSummary;
   onSelect: (id: string) => void;
-}
-
-function humanizeDimension(dimension: string): string {
-  return dimension
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 }
 
 export function ScenarioCard({ scenario, onSelect }: ScenarioCardProps) {
