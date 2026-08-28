@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Mic, Drama, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Mic, Drama, User, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn, getDisplayName } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +17,21 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-56 shrink-0 flex-col justify-between bg-studio-surface p-4">
       <nav className="flex flex-col gap-1">
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink transition-colors',
+              isActive
+                ? 'border-l-[3px] border-studio-crimson bg-studio-warm font-semibold'
+                : 'border-l-[3px] border-transparent hover:bg-studio-warm',
+            )
+          }
+        >
+          <LayoutDashboard className="size-4" />
+          Dashboard
+        </NavLink>
+
         <NavLink
           to="/voice-acting/scenarios"
           className={({ isActive }) =>

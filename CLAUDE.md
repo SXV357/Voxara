@@ -46,11 +46,13 @@ All backend code lives in `server/`, managed with `uv` (not pip/poetry). Command
   - `uv run python main.py` — direct invocation
   - `uv run fastapi dev main.py` — uvicorn CLI, if preferred
 - Env vars come from `server/.env` (Supabase URL/service-role key, OpenRouter keys — see `config.py`).
+- Requires system `ffmpeg` on PATH (`brew install ffmpeg` locally; `apt-get install ffmpeg` or equivalent on Linux deploy targets). Not a Python dependency — not declared in `pyproject.toml`/`uv.lock`, must be installed separately on every machine that runs the server. `faster-whisper` itself doesn't need it (PyAV bundles its own decoding libs), but `librosa` falls back to it via `audioread` when `soundfile`/libsndfile can't read the input format (e.g. webm/opus from the browser recorder).
 
 ### Gotchas
 
 - Auth verifies JWTs against Supabase's JWKS (ES256), cached forever per process — a signing-key rotation needs a backend restart.
 - `seed_scenarios()` reseeds scenarios on every `lifespan` boot, not a one-time script.
+- `soundfile`/libsndfile can't read webm/opus at all (any version) — `librosa.load` on a raw browser-recorded blob always hits the ffmpeg fallback, not just on older format edge cases.
 
 ## Behavioral Guidelines
 

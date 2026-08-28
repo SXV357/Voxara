@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, onboarding, scenarios, sessions, profile
 from seed import seed_scenarios
 import uvicorn
+import os
 
 '''
 google oauth setup
@@ -47,4 +48,17 @@ app.include_router(sessions.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    uvicorn.run(
+        "main:app", 
+        host="127.0.0.1", 
+        port=8000, 
+        reload=True,
+        reload_dirs=[current_dir],
+        reload_excludes=[
+            ".venv",
+            "__pycache__",
+            "*.pyc"
+        ]
+    )

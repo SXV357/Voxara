@@ -32,6 +32,7 @@
   --shadow-lift: 0 4px 16px oklch(0.15 0.025 27 / 0.12);
 
   --animate-recording-pulse: recording-pulse 1s ease-in-out infinite;
+  --animate-fade-in: fade-in 200ms ease-out;
 
   /* shadcn/ui CSS variable mapping */
   --background: oklch(0.980 0.008 72);
@@ -83,6 +84,15 @@
   }
   50% {
     opacity: 0.4;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
