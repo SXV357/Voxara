@@ -96,12 +96,13 @@ One accessibility/contrast note worth keeping in mind for future info/status mes
 
 ## Scenario Library (Phase 1B, Task 4)
 
-**What:** `GET /api/scenarios/voice-acting` (`server/routers/scenarios.py`) returns the 4 curated scenario summaries (id, title, context, dimensions); `GET /api/scenarios/{id}` returns the full scenario including the script. `server/seed.py`'s `seed_scenarios()` clears existing `mode="voice_acting"` rows and re-inserts the 4 scenarios (Villain Monologue, Fast Food Commercial, Multi-Character Audiobook Dialogue, Nature Documentary Narration), and runs automatically via a FastAPI `lifespan` handler in `main.py` on every app startup. `ScenarioCard` renders title, truncated context, dimension badges, and a Select button; `ScenarioSelectionPage` fetches the list and renders a responsive grid, navigating to `/voice-acting/record/:scenarioId` on select.
+**What:** `GET /api/scenarios/voice-acting` (`server/routers/scenarios.py`) returns the 4 curated scenario summaries (id, title, context, dimensions); `GET /api/scenarios/{id}` returns the full scenario including the script. `server/seed.py`'s `seed_scenarios()` upserts the 4 scenarios (Villain Monologue, Fast Food Commercial, Multi-Character Audiobook Dialogue, Nature Documentary Narration) on the `(mode, title)` natural key, then deletes any `mode="voice_acting"` rows whose titles are no longer in the list, and runs automatically via a FastAPI `lifespan` handler in `main.py` on every app startup. `ScenarioCard` renders title, truncated context, dimension badges, and a Select button; `ScenarioSelectionPage` fetches the list and renders a responsive grid, navigating to `/voice-acting/record/:scenarioId` on select.
 
 **Why:** Scenario content needs to exist before the selection UI has anything to render, and it needs to be trivially re-runnable as scripts/dimensions get tuned pre-launch.
 
 **Method chosen vs. alternatives:**
-- Seeding runs on app startup (`lifespan`) instead of a manually-invoked `scripts/seed_scenarios.py`. A manual step is easy to forget after editing scenario copy; startup seeding guarantees the DB always matches the code without a separate command to remember. Tradeoff: every reload during local dev re-runs a delete+insert against Supabase — negligible cost at 4 rows, would need reconsidering if scenario count or seed cost grows.
+- Seeding runs on app startup (`lifespan`) instead of a manually-invoked `scripts/seed_scenarios.py`. A manual step is easy to forget after editing scenario copy; startup seeding guarantees the DB always matches the code without a separate command to remember.
+- **Upsert on `(mode, title)`, not delete-then-insert** (migration `20260830213000_scenarios_natural_key.sql` adds the unique constraint). The old delete+insert gave every scenario a fresh `id` on each boot, which would break the `sessions.scenario_id` FK (`NO ACTION`) the moment a real session referenced a scenario — the server would fail to boot. Upsert keeps ids stable; a separate prune handles scenarios removed from the list. `(mode, title)` is a composite key because a future mode (e.g. theatre) could reuse a title. The surrogate `id` uuid stays the PK so FKs stay narrow and titles stay editable.
 - `GET /{scenario_id}` avoids `.single()` and instead checks `if not result.data` (same pattern as the onboarding route's update check) — `.single()` raises inside the postgrest client on zero rows, which is a less direct way to produce the 404 than just checking an empty list.
 
 ## Profile Page (pulled forward from Task 8)
@@ -133,6 +134,27 @@ One accessibility/contrast note worth keeping in mind for future info/status mes
 
 - `MediaRecorder.pause()`/`.resume()` are native and used directly — no manual chunk-splicing needed to support pause.
 - `AudioContext` is created after an async `getUserMedia()` resolves (inside a `useEffect`, not synchronously in the click handler), which is technically outside the click's call stack — works in practice because browsers' sticky user-activation flag outlives a single task, but `audioCtx.resume()` is called defensively right after construction in case a browser creates it `suspended`.
+
+## Audio Processing & Feedback Pipeline (Phase 1B, Task 6)
+
+**What:** `POST /api/sessions/voice-acting` (multipart `audio` + `scenario_id`) now runs the real pipeline. It looks up the scenario (404 if missing) and the caller's `voice_acting_profile` (400 if unset) in the request, uploads the webm to the private `recordings/{user_id}/{session_id}.webm` bucket, inserts a `sessions` row with `status='processing'`, and returns `{session_id}` immediately. A FastAPI `BackgroundTask` (`run_pipeline`) then: decodes the webm to a 16 kHz mono float32 ndarray once (`server/services/audio.py`, faster-whisper's bundled PyAV — no ffmpeg), transcribes it with a lazily-loaded module-level `WhisperModel` singleton (`transcription.py` → `Transcript` of text + per-word timestamps), extracts prosody with librosa (`prosody.py` → duration, pitch mean/std/range, tempo, RMS mean/std), counts filler words (`fillers.py`), calls OpenRouter for structured coaching feedback (`feedback.py` → `Feedback`), and updates the row to `status='complete'` with `transcript`/`prosody_data`/`feedback` populated. Any exception flips the row to `status='failed'` with `error_message`. `GET /api/sessions/` (list, newest first, scenario title via PostgREST embed) and `GET /api/sessions/{id}` (single, scoped to `user_id`, 404 otherwise) return the frontend `SessionSummary` / `SessionDetail` shapes. Frontend: new `client/src/lib/sessionsApi.ts` (`fetchSessions` / `fetchSessionDetail`, bearer token from `supabase.auth.getSession()`) replaces `mockSessions.ts` (deleted); `DashboardPage` and `FeedbackPage` swap the two imports, nothing else changes. Schema: `supabase/migrations/20260830212114_session_status.sql` added `sessions.status` + `error_message`.
+
+**Why:** Task 6 of `PLAN.md` — the real transcription + analysis + LLM feedback that the already-built Feedback/Dashboard UI was waiting on. Full design rationale in `BACKEND_PIPELINE_PLAN.md`.
+
+**Method chosen vs. alternatives:**
+- **BackgroundTasks, not a blocking request.** The frontend was already built to poll (`usePolling`, `FeedbackSkeleton`, `SessionStatus`), so returning `{session_id}` immediately and processing async matches it exactly. No Celery/queue — MVP is single-process; a mid-run restart orphaning a `processing` row is acceptable (user re-records).
+- **One in-memory decode, shared by whisper and librosa** — `decode_audio(BytesIO)` returns the ndarray both need; whisper skips its internal decode when handed an array, and every librosa function takes `y=<array>, sr=16000`. Kills the `to_wav`/ffmpeg subprocess step the original plan sketched, and the system-`ffmpeg` prerequisite with it.
+- **All handlers + services + the background task stay sync `def`** — matches every existing router. FastAPI runs sync endpoints and sync `BackgroundTasks` in its threadpool, so the blocking CPU work (whisper, librosa) never stalls the event loop. Making them `async` would be a lie — the underlying libs (supabase-py, faster-whisper, librosa) are all sync.
+- **Whisper model is a lazy module-level singleton** — first call downloads (~140 MB) + loads (~10s); the session sits in `processing` meanwhile, which the frontend handles. No startup warm-up in MVP.
+- **Feedback service: primary model, then one fallback attempt on any error** (HTTP, JSON, or schema validation) — `response_format={"type":"json_object"}` + `Feedback.model_validate_json`. If the fallback also fails, the exception propagates and the orchestrator writes `status='failed'`.
+- **`sessionsApi.ts` reads the token via `supabase.auth.getSession()`** rather than threading it through component props — keeps the page components' `useCallback(() => fetchSessions(), [])` identical to the mock call sites.
+
+### Pipeline quirks / gotchas
+
+- `decode_audio` forces a `gc.collect()` per call (a PyAV resampler-leak workaround baked into faster-whisper) — adds a few hundred ms per session. Negligible here.
+- `librosa.beat.beat_track` is a music-beat estimator; on speech its "tempo" is a loose proxy. Kept because `PLAN.md` specifies it and the LLM also gets raw word timestamps.
+- `prosody.analyze` returns plain `float(...)`, never numpy scalars — numpy scalars aren't JSON-serializable into the `prosody_data` jsonb column. Fully-unvoiced clips return `0.0` for pitch fields, not `NaN`.
+- The scientific stack (numpy/librosa/av) imports very slowly on a cold machine — first `uv run` after a reboot can take minutes before the server is ready.
 
 ## Verification
 

@@ -7,7 +7,7 @@ import { FeedbackView } from '@/components/FeedbackView';
 import { TranscriptView } from '@/components/TranscriptView';
 import { usePolling } from '@/hooks/usePolling';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import { fetchMockSessionDetail } from '@/lib/mockSessions';
+import { fetchSessionDetail } from '@/lib/sessionsApi';
 import type { SessionDetail } from '@/types';
 
 function isProcessing(session: SessionDetail): boolean {
@@ -21,7 +21,7 @@ export function FeedbackPage() {
 
   const fetcher = useCallback(() => {
     if (!sessionId) return Promise.reject(new Error('Missing session id'));
-    return fetchMockSessionDetail(sessionId);
+    return fetchSessionDetail(sessionId);
   }, [sessionId]);
 
   const { data: sessionData } = usePolling(fetcher, 3000, isProcessing);

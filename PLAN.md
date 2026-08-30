@@ -28,7 +28,7 @@
 - Supabase Storage for audio (not S3/R2 — v2 concern)
 - LLM primary/fallback configured via env vars, not hardcoded
 - Feedback must reference timestamps or quoted transcript phrases — not generic
-- ffmpeg must be installed on the host machine (required by both whisper and librosa for webm)
+- ~~ffmpeg must be installed on the host machine~~ — **no longer true.** The pipeline decodes webm in-memory via faster-whisper's bundled PyAV (`server/services/audio.py`); neither whisper nor librosa touches a file. See `BACKEND_PIPELINE_PLAN.md`.
 - All scenario scripts designed to be spoken in ~60 seconds; actual recording time varies by performer pace and scenario pacing (which is itself a feedback dimension)
 - Desktop-only for MVP — no responsive/mobile breakpoints anywhere in the app. Mobile is an explicit stretch goal for a future phase, not implicitly covered by "responsive grid" language elsewhere in this plan (e.g. `ScenarioSelectionPage`'s grid reflows column count on wide desktop viewports only, not down to phone widths)
 
@@ -187,7 +187,7 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 
 > **Why feedback must reference timestamps (the constraint):** Without this, LLMs default to generic coaching ("great energy!") that has no actionable value. Requiring timestamp or quote anchoring forces specificity. The tradeoff: the LLM prompt must be carefully engineered to produce valid references, and the output needs validation.
 
-**Prerequisite:** ffmpeg installed (`brew install ffmpeg` / `sudo apt install ffmpeg`)
+**Prerequisite:** ~~ffmpeg installed~~ — not needed, see the superseding note below.
 
 **Pipeline flow:**
 1. Convert webm → 16kHz mono WAV once (reused by both Whisper and librosa)
@@ -210,13 +210,22 @@ This is the design iteration point. If the shell layout, typography, spacing, or
 
 **Whisper model:** defaults to `"base"` (~140MB). Swap to `"small"` for better accuracy.
 
+> **Superseded by `BACKEND_PIPELINE_PLAN.md`** — that doc is the detailed, executed
+> version of this task. Key deviations from the sketch below: **no `to_wav` / ffmpeg
+> step** — `server/services/audio.py` decodes webm in-memory via faster-whisper's
+> bundled PyAV (`decode_audio`) once and shares the ndarray with both whisper and
+> librosa; **BackgroundTasks**, not a blocking request — `POST` inserts a `processing`
+> row and returns `{session_id}` immediately, the pipeline runs in a background task
+> that flips the row to `complete`/`failed` (needs `sessions.status` + `error_message`,
+> added in `supabase/migrations/20260830212114_session_status.sql`).
+
 **Steps:**
-- [ ] Create audio conversion service: `to_wav(audio_bytes: bytes) -> bytes` — writes webm to temp file, runs `ffmpeg -ac 1 -ar 16000`, returns WAV bytes, cleans up temp files
-- [ ] Create transcription service: module-level model singleton loaded lazily on first call. `transcribe(wav_bytes)` returns whisper result dict. Parse into flat transcript text + word list with timestamps.
-- [ ] Create prosody service: `analyze(wav_bytes) -> dict` returning duration, pitch mean/std/range, tempo BPM, RMS mean/std
-- [ ] Create filler word detector: strips punctuation, checks against filler sets, handles two-word fillers
-- [ ] Create feedback service: assemble LLM prompt, call OpenRouter with primary then fallback model, validate JSON response as `Feedback` model.
-- [ ] Implement sessions router: `POST /voice-acting` orchestrates the full pipeline and persists result; `GET /` lists user sessions with scenario title join; `GET /{id}` returns full session.
+- [x] ~~Create audio conversion service `to_wav`~~ → `server/services/audio.py` `load_audio()` (in-memory `decode_audio`, no ffmpeg)
+- [x] Create transcription service: lazy module-level `WhisperModel` singleton; `transcribe(ndarray) -> Transcript` (flat text + word list with timestamps)
+- [x] Create prosody service: `analyze(ndarray) -> dict` — duration, pitch mean/std/range (`pyin`), tempo (`beat_track`), RMS mean/std; plain floats for jsonb
+- [x] Create filler word detector: `server/services/fillers.py` `count_fillers()` — normalizes punctuation, single + two-word ("you know") fillers
+- [x] Create feedback service: `server/services/feedback.py` — system prompt + OpenRouter call (sync `httpx`, `response_format=json_object`), primary then one fallback attempt, `Feedback.model_validate_json`
+- [x] Implement sessions router: `POST /voice-acting` (insert `processing` row + `background_tasks.add_task(run_pipeline, ...)`); `GET /` (scenario-title embed, newest first); `GET /{id}` (scoped to `user_id`, 404 otherwise)
 - [ ] Verify end-to-end via frontend recording page: whisper loads model on first run (~10s), processing completes in 15–40s, session row appears in Supabase with populated `feedback` column
 - [ ] Commit: `feat: voice acting processing pipeline — whisper, librosa, filler detection, openrouter feedback`
 
