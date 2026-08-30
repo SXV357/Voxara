@@ -96,6 +96,17 @@ VOICE_ACTING_SCENARIOS = [
 
 
 def seed_scenarios() -> None:
-    supabase.table("scenarios").delete().eq("mode", "voice_acting").execute()
-    supabase.table("scenarios").insert(VOICE_ACTING_SCENARIOS).execute()
+    # Upsert on the (mode, title) natural key so scenario ids stay stable across
+    # boots — sessions.scenario_id references scenarios.id, so reinserting with
+    # fresh uuids would break that FK once real sessions exist.
+    supabase.table("scenarios").upsert(
+        VOICE_ACTING_SCENARIOS, on_conflict="mode,title"
+    ).execute()
+
+    # Drop any voice_acting scenarios no longer in the seed list.
+    titles = [s["title"] for s in VOICE_ACTING_SCENARIOS]
+    supabase.table("scenarios").delete().eq("mode", "voice_acting").not_.in_(
+        "title", titles
+    ).execute()
+
     print(f"Seeded {len(VOICE_ACTING_SCENARIOS)} scenarios.")
