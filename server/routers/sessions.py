@@ -1,11 +1,13 @@
+import logging
+from concurrent.futures import Future
 from uuid import uuid4
 
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     Form,
     HTTPException,
+    Request,
     UploadFile,
 )
 
@@ -19,6 +21,19 @@ from services.prosody import analyze
 from services.transcription import transcribe
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+_logger = logging.getLogger(__name__)
+
+
+def _log_worker_crash(fut: Future) -> None:
+    """Runs in the web process when a pipeline future resolves. `run_pipeline`
+    catches its own exceptions and writes a `failed` row, so this only trips when
+    the worker process itself dies (OOM, segfault, BrokenProcessPool) — the
+    session is then stuck in `processing` with nothing else logged."""
+    exc = fut.exception()
+    if exc is not None:
+        _logger.error(
+            "pipeline worker died, session left in 'processing': %r", exc
+        )
 
 
 def run_pipeline(
@@ -54,7 +69,7 @@ def run_pipeline(
 
 @router.post("/voice-acting")
 def create_session(
-    background_tasks: BackgroundTasks,
+    request: Request,
     audio: UploadFile,
     scenario_id: str = Form(...),
     user: dict = Depends(get_current_user),
@@ -62,6 +77,7 @@ def create_session(
     user_id = user["sub"]
     audio_bytes = audio.file.read()
 
+    # defensive measure against if someone tries hitting the backend directly with an invalid scenario id
     scenario_res = (
         supabase.table("scenarios")
         .select("id,title,context,script,dimensions")
@@ -72,6 +88,12 @@ def create_session(
         raise HTTPException(status_code=404, detail="Scenario not found")
     scenario = scenario_res.data[0]
 
+    '''
+    again for defense against backdoor access
+
+    on frontend a user cannot record something unless their voice acting profile is set fully - focus areas,
+    experience level but someone can create account and hit the endpoint directly so this helps with that
+    '''
     profile_res = (
         supabase.table("profiles")
         .select("voice_acting_profile")
@@ -100,14 +122,21 @@ def create_session(
         }
     ).execute()
 
-    background_tasks.add_task(
+    fut = request.app.state.pipeline_pool.submit(
         run_pipeline, session_id, audio_bytes, scenario, profile
     )
+
+    # get back future after submitting job (when job ends receipt resolves in web process)
+    # this line says when receipt resolves run this (for when worker itself dies not related to processing pipeline at all)
+    fut.add_done_callback(_log_worker_crash)
+
     return {"session_id": session_id}
 
 
 @router.get("/", response_model=list[SessionSummary])
 def list_sessions(user: dict = Depends(get_current_user)):
+    # join embedded in .select for sessions.scenario_id = scenarios.id
+    # will embed it as "scenarios: {"title": <>}"
     res = (
         supabase.table("sessions")
         .select("id,mode,status,created_at,feedback,scenarios(title)")

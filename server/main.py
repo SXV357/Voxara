@@ -1,3 +1,5 @@
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -21,9 +23,23 @@ situations where the token can just be forged and someone breaking into the appl
 '''
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(app: FastAPI):
     seed_scenarios()
+
+    # The audio pipeline (whisper + librosa) is 20–60s of CPU-bound work. Running
+    # it in-process — even via BackgroundTasks — pegs every core and holds the GIL,
+    # starving the single-process event loop so every other request hangs until it
+    # finishes. A separate process has its own interpreter/GIL/CPU scheduling.
+    # `spawn` is deliberate: Linux defaults to `fork`, and forking the threaded
+    # uvicorn process can deadlock. max_workers=1 → one reused worker, one model load.
+    app.state.pipeline_pool = ProcessPoolExecutor(
+        max_workers=1,
+        mp_context=multiprocessing.get_context("spawn"),
+    )
     yield
+    # On a graceful stop/reload an in-flight job is dropped; its row stays
+    # `processing` (accepted MVP behavior — the user re-records).
+    app.state.pipeline_pool.shutdown(wait=False, cancel_futures=False)
 
 
 app = FastAPI(title="Voxara API", lifespan=lifespan)
@@ -57,7 +73,7 @@ if __name__ == "__main__":
         reload=True,
         reload_dirs=[current_dir],
         reload_excludes=[
-            ".venv",
+            os.path.join(current_dir, ".venv"),
             "__pycache__",
             "*.pyc"
         ]

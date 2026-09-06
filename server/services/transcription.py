@@ -12,6 +12,13 @@ def _get_model() -> WhisperModel:
 
     First call downloads the model (~140 MB for `base`) and takes ~10s; the
     session sits in `processing` meanwhile, which the frontend handles.
+
+    one thing to consider later on: switching to base.en potentially if transcripts
+    come out weird because this is made specifically for english - right now only
+    "base" is used (testing will be important for that)
+
+    faster whisper runs on any CPU and is portable; MLX/whisper.cpp only accelerate on
+    apple silicon and on linux server would fall back to plain CPU
     """
     global _model
     if _model is None:
